@@ -1,9 +1,9 @@
-package com.demo.flowchart;
+package com.demo.flowchart.drawing.model;
 
-import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.RectF;
+
+import com.demo.flowchart.drawing.model.Block;
 
 public class ProcessBlock extends Block {
 
@@ -16,7 +16,5 @@ public class ProcessBlock extends Block {
         RectF rectF = new RectF(startX, startY, startX + width, startY + height);
         figure.reset();
         figure.addRect(rectF, Path.Direction.CW);
-        figure.close();
     }
-
 }

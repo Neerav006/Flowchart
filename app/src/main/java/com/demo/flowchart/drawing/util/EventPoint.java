@@ -1,4 +1,4 @@
-package com.demo.flowchart;
+package com.demo.flowchart.drawing.util;
 
 import android.view.MotionEvent;
 
