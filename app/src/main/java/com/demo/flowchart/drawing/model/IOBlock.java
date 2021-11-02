@@ -7,13 +7,12 @@ public class IOBlock extends Block {
     }
 
     @Override
-    protected void createFigure() {
-        figure.reset();
+    protected void createContour() {
         int shift = 20;
-        figure.moveTo(startX + shift, startY);
-        figure.rLineTo(width - shift, 0);
-        figure.rLineTo(-shift, height);
-        figure.rLineTo(shift - width, 0);
-        figure.rLineTo(shift, -height);
+        contour.moveTo(startX + shift, startY);
+        contour.rLineTo(width - shift, 0);
+        contour.rLineTo(-shift, height);
+        contour.rLineTo(shift - width, 0);
+        contour.rLineTo(shift, -height);
     }
 }

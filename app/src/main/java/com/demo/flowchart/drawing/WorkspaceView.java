@@ -9,7 +9,6 @@ import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -26,7 +25,6 @@ import com.demo.flowchart.drawing.model.TerminalBlock;
 import com.demo.flowchart.drawing.util.GridPoint;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class WorkspaceView extends View {
 
@@ -56,8 +54,10 @@ public class WorkspaceView extends View {
     private final GestureDetector gestureDetector;
 
     private Block touchedBlock;
+    private Block selectedBlock;
     private boolean isBlockMovable;
     private boolean isBlockClicked;
+    private boolean isDoubleTaped;
 
     private int lastDownX, lastDownY;
     private long lastDownTime;
@@ -66,19 +66,29 @@ public class WorkspaceView extends View {
     private final Matrix gridMatrix;
     private final Paint blockPaint;
     private final Paint gridPaint;
+    // test paints
+    private final Paint touchedPaint;
+    private final Paint movablePaint;
+    private final Paint selectedPaint;
 
-    private List<Block> blocks;
+    private ArrayList<Block> blocks;
+
     private void setTestBlocks() {
-        TerminalBlock test1 = new TerminalBlock(20, 280, 100, 40);
-        DecisionBlock test2 = new DecisionBlock(40, 120, 180, 120);
+        TerminalBlock test1 = new TerminalBlock(20, 240, 120, 60);
+        DecisionBlock test2 = new DecisionBlock(40, 120, 180, 80);
         ProcessBlock test3 = new PredefinedProcessBlock(20, 20, 120, 80);
         IOBlock test4 = new IOBlock(40, 340, 120, 80);
 
-        blocks = new ArrayList();
+//        ProcessBlock test5 = new ProcessBlock(20, 20, 120, 80);
+//        ProcessBlock test6 = new ProcessBlock(60, 140, 120, 80);
+
+        blocks = new ArrayList<>();
         blocks.add(test1);
         blocks.add(test2);
         blocks.add(test3);
         blocks.add(test4);
+//        blocks.add(test5);
+//        blocks.add(test6);
     }
 
     public WorkspaceView(Context context, AttributeSet attrs) {
@@ -102,6 +112,21 @@ public class WorkspaceView extends View {
         gridPaint = new Paint();
         gridPaint.setColor(Color.LTGRAY);
         gridPaint.setStyle(Paint.Style.STROKE);
+
+        touchedPaint = new Paint();
+        touchedPaint.setColor(Color.CYAN);
+        touchedPaint.setStrokeWidth(8f / scale);
+        touchedPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        movablePaint = new Paint();
+        movablePaint.setColor(Color.RED);
+        movablePaint.setStrokeWidth(8f / scale);
+        movablePaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        selectedPaint = new Paint();
+        selectedPaint.setColor(Color.YELLOW);
+        selectedPaint.setStrokeWidth(8f / scale);
+        selectedPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         setTestBlocks();
     }
@@ -132,7 +157,18 @@ public class WorkspaceView extends View {
         drawGrid(canvas);
 
         for (Block block : blocks) {
-            block.draw(canvas, blockPaint);
+            // test
+            if (touchedBlock != null && block == touchedBlock) {
+                if (isBlockMovable) {
+                    block.draw(canvas, movablePaint);
+                } else {
+                    block.draw(canvas, touchedPaint);
+                }
+            } else if (selectedBlock != null && block == selectedBlock) {
+                block.draw(canvas, selectedPaint);
+            } else {
+                block.draw(canvas, blockPaint);
+            }
         }
     }
 
@@ -157,6 +193,7 @@ public class WorkspaceView extends View {
 
         boolean isHoldDown;
         boolean isLongTime;
+        isLongTime = ((event.getEventTime() - lastDownTime) > LONG_PRESS_TIMEOUT);
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
@@ -174,7 +211,7 @@ public class WorkspaceView extends View {
                 if (!isLongPressed) {
                     // A long press consists of a hold and a long touch
                     isHoldDown = ((Math.abs(eventX - lastDownX) < 5) && (Math.abs(eventY - lastDownY) < 5));
-                    isLongTime = ((event.getEventTime() - lastDownTime) > LONG_PRESS_TIMEOUT);
+//                    isLongTime = ((event.getEventTime() - lastDownTime) > LONG_PRESS_TIMEOUT);
                     isLongPressed = isHoldDown && isLongTime;
                     vibrator.cancel();
                 }
@@ -182,7 +219,26 @@ public class WorkspaceView extends View {
                 isBlockMovable = isLongPressed && (touchedBlock != null);
                 break;
             }
-            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_UP: {
+                if (!isLongTime && !isLongPressed && !isDoubleTaped) {
+                    searchTouchedBlock(event);
+                    if (touchedBlock != null) {
+                        if (selectedBlock != null) {
+                            if (touchedBlock != selectedBlock) {
+                                selectedBlock.setOrRemoveFlowline(touchedBlock);
+                                invalidate();
+                                touchedBlock = null;
+                            }
+                            selectedBlock = null;
+                        } else {
+                            selectedBlock = touchedBlock;
+                        }
+                    } else {
+                        selectedBlock = null;
+                    }
+                }
+//                break;
+            }
             case MotionEvent.ACTION_CANCEL: {
                 if (touchedBlock != null) {
                     touchedBlock.bindToGrid();
@@ -190,11 +246,13 @@ public class WorkspaceView extends View {
                 }
                 isLongPressed = false;
                 isBlockMovable = false;
+                isDoubleTaped = false;
                 touchedBlock = null;
                 vibrator.cancel();
                 break;
             }
         }
+        invalidate();
         return true;
     }
 
@@ -203,6 +261,8 @@ public class WorkspaceView extends View {
         public boolean onScale(ScaleGestureDetector detector) {
             scale *= detector.getScaleFactor();
             adjustAndSetScale();
+            selectedBlock = null;
+            touchedBlock = null;
             return true;
         }
     }
@@ -216,15 +276,26 @@ public class WorkspaceView extends View {
                     ? String.format("Block: %s", touchedBlock.getClass().getSimpleName())
                     : "Workspace";
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+
+            searchTouchedBlock(event);
+            if (touchedBlock != null) {
+
+            }
+
             return true;
         }
 
         @Override
         public boolean onDoubleTap(MotionEvent event) {
+            isDoubleTaped = true;
             scale = (scale != PRE_SCALE) ? PRE_SCALE : PRE_SCALE * 1.5f;
             adjustAndSetScale();
+            selectedBlock = null;
+            touchedBlock = null;
             return true;
         }
+
+
 
         @Override
         public boolean onScroll(MotionEvent downEvent, MotionEvent scrollEvent, float distanceX, float distanceY) {
@@ -268,6 +339,7 @@ public class WorkspaceView extends View {
         gridMatrix.invert(gridMatrix);
         GridPoint gridPoint = new GridPoint(downEvent, gridMatrix);
 
+        touchedBlock = null;
         for (Block block : blocks) {
             if (block.contains(gridPoint)) {
                 touchedBlock = block;
@@ -291,6 +363,5 @@ public class WorkspaceView extends View {
                 vibrator.vibrate(delayPattern, -1);
             }
         }
-
     }
 }

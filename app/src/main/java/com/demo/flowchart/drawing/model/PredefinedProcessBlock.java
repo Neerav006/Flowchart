@@ -7,13 +7,12 @@ public class PredefinedProcessBlock extends ProcessBlock {
     }
 
     @Override
-    protected void createFigure() {
-        super.createFigure();
+    protected void createContour() {
+        super.createContour();
         int edgeWidth = 10;
-        figure.moveTo(startX + edgeWidth, startY);
-        figure.rLineTo(0, height);
-        figure.moveTo(startX + width - edgeWidth, startY);
-        figure.rLineTo(0, height);
-
+        contour.moveTo(startX + edgeWidth, startY);
+        contour.rLineTo(0, height);
+        contour.moveTo(startX + width - edgeWidth, startY);
+        contour.rLineTo(0, height);
     }
 }

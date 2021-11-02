@@ -15,10 +15,13 @@ public abstract class Block {
     protected int width;
     protected int height;
 
-    protected Paint innerPaint;
-
-    protected Path figure;
+    protected Path contour;
     protected RectF bounds;
+
+    protected Flowline flowline;
+
+    protected Paint fillPaint;
+    protected Paint boundsPaint;
 
     protected Block(int startX, int startY, int width, int height) {
         this.startX = startX;
@@ -26,48 +29,65 @@ public abstract class Block {
         this.width = width;
         this.height = height;
 
-//        outerPaint = new Paint();
-//        outerPaint.setColor(Color.BLACK);
-//        outerPaint.setStrokeWidth(2f);
-//        outerPaint.setStyle(Paint.Style.STROKE);
+        adjustSize();
+        bindToGrid();
 
-        innerPaint = new Paint();
-        innerPaint.setColor(Color.GREEN);
-        innerPaint.setStyle(Paint.Style.FILL);
-
-        figure = new Path();
+        contour = new Path();
         bounds = new RectF();
 
-        bindToGrid();
+        fillPaint = new Paint();
+        fillPaint.setColor(Color.WHITE);
+        fillPaint.setStyle(Paint.Style.FILL);
+
+        boundsPaint = new Paint();
+        boundsPaint.setColor(Color.MAGENTA);
+        boundsPaint.setStyle(Paint.Style.FILL);
     }
 
     public boolean contains(GridPoint gridPoint) {
         return bounds.contains(gridPoint.X, gridPoint.Y);
     }
 
-    public void draw(Canvas canvas, Paint outerPaint) {
-        createFigure();
-        canvas.drawRect(bounds, innerPaint);
-//        canvas.drawPath(figure, innerPaint);
-        canvas.drawPath(figure, outerPaint);
+    public void draw(Canvas canvas, Paint contourPaint) {
+        createShape();
+//        canvas.drawRect(bounds, boundsPaint);
+        canvas.drawPath(contour, fillPaint);
+        canvas.drawPath(contour, contourPaint);
+
+        if (flowline != null) {
+            flowline.draw(canvas, contourPaint);
+        }
     }
 
     public void move(float dX, float dY) {
         startX -= Math.round(dX);
         startY -= Math.round(dY);
-        rebuildBlock();
     }
 
     public void bindToGrid() {
         startX = Math.round(startX / 10f) * 10;
         startY = Math.round(startY / 10f) * 10;
-        rebuildBlock();
     }
 
-    protected abstract void createFigure();
-
-    protected void rebuildBlock() {
-        createFigure();
-        figure.computeBounds(bounds, false);
+    public void setOrRemoveFlowline(Block endBlock) {
+        if (flowline == null || flowline.endBlock != endBlock) {
+            flowline = new Flowline(this, endBlock);
+        } else {
+            flowline = null;
+        }
     }
+
+    protected void adjustSize() {
+        height = Math.round(height / 10f) * 10;
+        width = height * 3 / 2;
+    }
+
+    protected void createShape() {
+        contour.reset();
+        createContour();
+        contour.close();
+        contour.computeBounds(bounds, false);
+    }
+
+    protected abstract void createContour();
 }

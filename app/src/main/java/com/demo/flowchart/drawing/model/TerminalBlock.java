@@ -10,9 +10,8 @@ public class TerminalBlock  extends Block {
     }
 
     @Override
-    protected void createFigure() {
+    protected void createContour() {
         RectF rectF = new RectF(startX, startY, startX + width, startY + height);
-        figure.reset();
-        figure.addRoundRect(rectF, 20f, 20f, Path.Direction.CW);
+        contour.addRoundRect(rectF, 20f, 20f, Path.Direction.CW);
     }
 }
