@@ -17,28 +17,33 @@ import android.view.ViewConfiguration;
 import android.widget.Toast;
 
 import com.demo.flowchart.drawing.model.Block;
-import com.demo.flowchart.drawing.model.DecisionBlock;
-import com.demo.flowchart.drawing.model.IOBlock;
 import com.demo.flowchart.drawing.model.PredefinedProcessBlock;
 import com.demo.flowchart.drawing.model.ProcessBlock;
 import com.demo.flowchart.drawing.model.TerminalBlock;
-import com.demo.flowchart.drawing.util.GridPoint;
+import com.demo.flowchart.drawing.util.WorkspacePoint;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class WorkspaceView extends View {
 
+    public static final int GRID_STEP_SMALL = 10;
+
     private static final int WORKSPACE_WIDTH = 1000;
     private static final int WORKSPACE_HEIGHT = 1000;
-    private static final int GRID_STEP_SMALL = 10;
     private static final int GRID_STEP_LARGE = 40;
 
     private static final int MAX_X_OFFSET = 0;
     private static final int MAX_Y_OFFSET = 0;
 
-    private static final int PRE_SCALE = 4;
-    private static final int MAX_SCALE = 10;
+    private static final float PRE_SCALE = 4f;
+    private static final float MAX_SCALE = 10f;
+    private static final float DOUBLE_TAP_SCALE_FACTOR = 1.5f;
 
+    private static final float BOLD_LINE_WIDTH = 8f;
+    private static final float THIN_LINE_WIDTH = 3f;
+
+    private static final int HOLD_DOWN_ALLOWABLE_OFFSET = 5;
     private static final long LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
     private final Context context;
@@ -66,28 +71,28 @@ public class WorkspaceView extends View {
     private final Matrix gridMatrix;
     private final Paint blockPaint;
     private final Paint gridPaint;
-    // test paints
+
+    // Test
     private final Paint touchedPaint;
     private final Paint movablePaint;
     private final Paint selectedPaint;
 
-    private ArrayList<Block> blocks;
+    private List<Block> blocks;
 
     private void setTestBlocks() {
-        TerminalBlock test1 = new TerminalBlock(20, 240, 120, 60);
-        DecisionBlock test2 = new DecisionBlock(40, 120, 180, 80);
-        ProcessBlock test3 = new PredefinedProcessBlock(20, 20, 120, 80);
-        IOBlock test4 = new IOBlock(40, 340, 120, 80);
-
-//        ProcessBlock test5 = new ProcessBlock(20, 20, 120, 80);
+        TerminalBlock test1 = new TerminalBlock(20, 20, 120, 80);
+//        DecisionBlock test2 = new DecisionBlock(40, 120, 180, 80);
+        ProcessBlock test3 = new PredefinedProcessBlock(120, 240, 120, 80);
+//        IOBlock test4 = new IOBlock(40, 340, 120, 80);
+        ProcessBlock test5 = new ProcessBlock(240, 480, 120, 80);
 //        ProcessBlock test6 = new ProcessBlock(60, 140, 120, 80);
 
         blocks = new ArrayList<>();
         blocks.add(test1);
-        blocks.add(test2);
+//        blocks.add(test2);
         blocks.add(test3);
-        blocks.add(test4);
-//        blocks.add(test5);
+//        blocks.add(test4);
+        blocks.add(test5);
 //        blocks.add(test6);
     }
 
@@ -108,24 +113,25 @@ public class WorkspaceView extends View {
         blockPaint = new Paint();
         blockPaint.setColor(Color.BLACK);
         blockPaint.setStyle(Paint.Style.STROKE);
-        blockPaint.setStrokeWidth(8f / scale);
+        blockPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
         gridPaint = new Paint();
         gridPaint.setColor(Color.LTGRAY);
         gridPaint.setStyle(Paint.Style.STROKE);
 
+        // Test
         touchedPaint = new Paint();
         touchedPaint.setColor(Color.CYAN);
-        touchedPaint.setStrokeWidth(8f / scale);
+        touchedPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
         touchedPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         movablePaint = new Paint();
         movablePaint.setColor(Color.RED);
-        movablePaint.setStrokeWidth(8f / scale);
+        movablePaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
         movablePaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         selectedPaint = new Paint();
         selectedPaint.setColor(Color.YELLOW);
-        selectedPaint.setStrokeWidth(8f / scale);
+        selectedPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
         selectedPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         setTestBlocks();
@@ -140,8 +146,8 @@ public class WorkspaceView extends View {
         } else {
             minScale = (float) bottom / WORKSPACE_HEIGHT;
         }
-        minXOffset = right - WORKSPACE_WIDTH * PRE_SCALE;
-        minYOffset = bottom - WORKSPACE_HEIGHT * PRE_SCALE;
+        minXOffset = right - Math.round(WORKSPACE_WIDTH * PRE_SCALE);
+        minYOffset = bottom - Math.round(WORKSPACE_HEIGHT * PRE_SCALE);
     }
 
     @Override
@@ -157,7 +163,7 @@ public class WorkspaceView extends View {
         drawGrid(canvas);
 
         for (Block block : blocks) {
-            // test
+            // Test
             if (touchedBlock != null && block == touchedBlock) {
                 if (isBlockMovable) {
                     block.draw(canvas, movablePaint);
@@ -176,9 +182,9 @@ public class WorkspaceView extends View {
         for (int x = 0; x <= WORKSPACE_WIDTH; x += GRID_STEP_SMALL) {
             for (int y = 0; y <= WORKSPACE_HEIGHT; y += GRID_STEP_SMALL) {
                 if (x % GRID_STEP_LARGE == 0 && y % GRID_STEP_LARGE == 0) {
-                    gridPaint.setStrokeWidth(8f / scale);
+                    gridPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
                 } else {
-                    gridPaint.setStrokeWidth(3f / scale);
+                    gridPaint.setStrokeWidth(THIN_LINE_WIDTH / scale);
                 }
                 canvas.drawLine(0, y, WORKSPACE_WIDTH, y, gridPaint);
                 canvas.drawLine(x, 0, x, WORKSPACE_HEIGHT, gridPaint);
@@ -186,6 +192,7 @@ public class WorkspaceView extends View {
         }
     }
 
+    // TODO Make it prettier
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         scaleGestureDetector.onTouchEvent(event);
@@ -210,8 +217,8 @@ public class WorkspaceView extends View {
                 // Detect a long press until it happens
                 if (!isLongPressed) {
                     // A long press consists of a hold and a long touch
-                    isHoldDown = ((Math.abs(eventX - lastDownX) < 5) && (Math.abs(eventY - lastDownY) < 5));
-//                    isLongTime = ((event.getEventTime() - lastDownTime) > LONG_PRESS_TIMEOUT);
+                    isHoldDown = ((Math.abs(eventX - lastDownX) < HOLD_DOWN_ALLOWABLE_OFFSET)
+                            && (Math.abs(eventY - lastDownY) < HOLD_DOWN_ALLOWABLE_OFFSET));
                     isLongPressed = isHoldDown && isLongTime;
                     vibrator.cancel();
                 }
@@ -279,23 +286,19 @@ public class WorkspaceView extends View {
 
             searchTouchedBlock(event);
             if (touchedBlock != null) {
-
             }
-
             return true;
         }
 
         @Override
         public boolean onDoubleTap(MotionEvent event) {
             isDoubleTaped = true;
-            scale = (scale != PRE_SCALE) ? PRE_SCALE : PRE_SCALE * 1.5f;
+            scale = (scale != PRE_SCALE) ? PRE_SCALE : PRE_SCALE * DOUBLE_TAP_SCALE_FACTOR;
             adjustAndSetScale();
             selectedBlock = null;
             touchedBlock = null;
             return true;
         }
-
-
 
         @Override
         public boolean onScroll(MotionEvent downEvent, MotionEvent scrollEvent, float distanceX, float distanceY) {
@@ -317,7 +320,7 @@ public class WorkspaceView extends View {
         scale = Math.max(minScale, Math.min(MAX_SCALE, scale));
         minXOffset = getWidth() - Math.round(WORKSPACE_WIDTH * scale);
         minYOffset = getHeight() - Math.round(WORKSPACE_HEIGHT * scale);
-        blockPaint.setStrokeWidth(8f / scale);
+        blockPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
         invalidate();
     }
 
@@ -337,11 +340,11 @@ public class WorkspaceView extends View {
         gridMatrix.preScale(scale, scale);
         gridMatrix.postTranslate(xOffset, yOffset);
         gridMatrix.invert(gridMatrix);
-        GridPoint gridPoint = new GridPoint(downEvent, gridMatrix);
+        WorkspacePoint workspacePoint = new WorkspacePoint(downEvent, gridMatrix);
 
         touchedBlock = null;
         for (Block block : blocks) {
-            if (block.contains(gridPoint)) {
+            if (block.contains(workspacePoint)) {
                 touchedBlock = block;
                 break;
             }
