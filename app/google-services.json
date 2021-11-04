@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "75520924304",
+    "project_id": "flowchart-77fbf",
+    "storage_bucket": "flowchart-77fbf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:75520924304:android:7a33fea076ca145eb55615",
+        "android_client_info": {
+          "package_name": "com.demo.flowchart"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "75520924304-ccqrh8rd3res7bmrb3aqgkp19q29b050.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCasa4YfXJT5Np32obwNWUNqJYRrbvnHkA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "75520924304-ccqrh8rd3res7bmrb3aqgkp19q29b050.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

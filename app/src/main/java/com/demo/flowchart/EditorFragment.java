@@ -16,7 +16,6 @@ public class EditorFragment extends Fragment {
     public static EditorFragment newInstance() {
         EditorFragment fragment = new EditorFragment();
         Bundle args = new Bundle();
-        // Put params
         fragment.setArguments(args);
         return fragment;
     }

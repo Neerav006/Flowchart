@@ -6,6 +6,8 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.os.Bundle;
 
+import com.demo.flowchart.auth.view.LoginFragment;
+
 public class MainActivity extends AppCompatActivity implements Navigator {
 
     @Override
@@ -15,7 +17,7 @@ public class MainActivity extends AppCompatActivity implements Navigator {
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .replace(MAIN_CONTAINER_ID, EditorFragment.newInstance())
+                    .replace(MAIN_CONTAINER_ID, LoginFragment.newInstance())
                     .commit();
         }
     }
