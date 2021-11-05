@@ -4,16 +4,22 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import com.demo.flowchart.auth.view.LoginFragment;
 
+import com.demo.flowchart.editor.view.EditorFragment;
 import com.demo.flowchart.home.view.HomeFragment;
 import com.demo.flowchart.navigation.Navigator;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity implements Navigator {
 
+    private BottomNavigationView bottomNavigationView;
+
+    @SuppressLint("NonConstantResourceId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,12 +28,23 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         FirebaseAuth auth = FirebaseAuth.getInstance();
 
         if (savedInstanceState == null) {
-            if (auth.getCurrentUser() != null) {
-                navigateTo(HomeFragment.newInstance(), false);
-            } else {
-                navigateTo(LoginFragment.newInstance(), false);
-            }
+            navigateTo(HomeFragment.newInstance(), false);
         }
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            switch (item.getItemId()) {
+                case R.id.item_home:
+                    navigateTo(HomeFragment.newInstance(), false);
+                    return true;
+                case R.id.item_add:
+                    navigateTo(EditorFragment.newInstance(), false);
+                    return true;
+                case R.id.item_profile:
+                    navigateTo(LoginFragment.newInstance(), false);
+                    return true;
+            }
+            return false;
+        });
     }
 
     @Override
