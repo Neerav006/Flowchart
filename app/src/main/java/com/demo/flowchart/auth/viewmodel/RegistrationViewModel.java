@@ -12,7 +12,7 @@ import com.demo.flowchart.auth.result.VerificationPasswordError;
 
 public class RegistrationViewModel extends ViewModel {
 
-    private AuthRepository authRepository = new AuthRepository();
+    private final AuthRepository authRepository = new AuthRepository();
     public MutableLiveData<AuthResult> resultLiveData = authRepository.getResultLiveData();
     public MutableLiveData<Boolean> loadingState = new MutableLiveData<>();
 

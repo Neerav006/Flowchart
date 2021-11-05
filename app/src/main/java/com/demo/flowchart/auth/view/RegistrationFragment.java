@@ -74,21 +74,26 @@ public class RegistrationFragment extends Fragment {
     private void onRegistrationResult(AuthResult authResult) {
         if (authResult instanceof EmailError) {
             email.setError(((EmailError) authResult).message);
-        }
-        else if (authResult instanceof PasswordError) {
+        } else if (authResult instanceof PasswordError) {
             firstPassword.setError(((PasswordError) authResult).message);
-        }
-        else if (authResult instanceof VerificationPasswordError) {
+        } else if (authResult instanceof VerificationPasswordError) {
             secondPassword.setError(((VerificationPasswordError) authResult).message);
-        }
-        else if (authResult instanceof AuthError) {
+        } else if (authResult instanceof AuthError) {
             Toast.makeText(this.getContext(), ((AuthError) authResult).message, Toast.LENGTH_LONG).show();
-        }
-        else if (authResult instanceof AuthSuccess) {
+        } else if (authResult instanceof AuthSuccess) {
             Navigator navigator = (Navigator) this.getActivity();
             if (navigator != null) {
                 navigator.navigateTo(HomeFragment.newInstance(), true);
             }
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        email = null;
+        firstPassword = null;
+        secondPassword = null;
+        register = null;
     }
 }

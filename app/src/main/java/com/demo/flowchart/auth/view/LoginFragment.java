@@ -82,16 +82,19 @@ public class LoginFragment extends Fragment {
             Toast.makeText(this.getContext(), ((AuthError) authResult).message, Toast.LENGTH_LONG).show();
         }
         else if (authResult instanceof AuthSuccess) {
-
-            FirebaseUser user = ((AuthSuccess) authResult).user;
-            // Не уверен, что нам вообше нужно передавать user, т.к. мы всегда можем получить его через:
-            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-
             Navigator navigator = (Navigator) this.getActivity();
             if (navigator != null) {
                 navigator.navigateTo(HomeFragment.newInstance(), true);
             }
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        email = null;
+        password = null;
+        login = null;
+        register = null;
     }
 }

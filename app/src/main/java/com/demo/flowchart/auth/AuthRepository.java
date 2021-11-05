@@ -9,9 +9,9 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class AuthRepository {
 
-    private FirebaseAuth auth;
-    private MutableLiveData<AuthResult> resultLiveData;
-    private MutableLiveData<Boolean> loggedOutLiveData;
+    private final FirebaseAuth auth;
+    private final MutableLiveData<AuthResult> resultLiveData;
+    private final MutableLiveData<Boolean> loggedOutLiveData;
 
     public AuthRepository() {
         auth = FirebaseAuth.getInstance();
@@ -19,7 +19,7 @@ public class AuthRepository {
         loggedOutLiveData = new MutableLiveData<>();
 
         if (auth.getCurrentUser() != null) {
-            resultLiveData.postValue(new AuthSuccess(auth.getCurrentUser()));
+            resultLiveData.postValue(new AuthSuccess());
             loggedOutLiveData.postValue(false);
         }
     }
@@ -27,7 +27,7 @@ public class AuthRepository {
     public void login(String email, String password) {
         auth.signInWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful() && auth.getCurrentUser() != null) {
-                resultLiveData.postValue(new AuthSuccess(auth.getCurrentUser()));
+                resultLiveData.postValue(new AuthSuccess());
             } else {
                 resultLiveData.postValue(new AuthError("Вход не выполнен"));
             }
@@ -37,7 +37,7 @@ public class AuthRepository {
     public void register(String email, String password) {
         auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(task -> {
             if (task.isSuccessful() && auth.getCurrentUser() != null) {
-                resultLiveData.postValue(new AuthSuccess(auth.getCurrentUser()));
+                resultLiveData.postValue(new AuthSuccess());
             } else {
                 resultLiveData.postValue(new AuthError("Регистрация не выполнена"));
             }
