@@ -1,5 +1,6 @@
 package com.demo.flowchart.auth.view;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,14 +20,16 @@ import com.demo.flowchart.auth.result.AuthSuccess;
 import com.demo.flowchart.auth.result.EmailError;
 import com.demo.flowchart.auth.result.PasswordError;
 import com.demo.flowchart.auth.result.VerificationPasswordError;
-import com.demo.flowchart.home.view.HomeFragment;
 import com.demo.flowchart.navigation.Navigator;
 import com.demo.flowchart.R;
 import com.demo.flowchart.auth.result.AuthResult;
 import com.demo.flowchart.auth.viewmodel.RegistrationViewModel;
+import com.demo.flowchart.profile.ProfileFragment;
 
 
 public class RegistrationFragment extends Fragment {
+
+    private Navigator navigator;
 
     private RegistrationViewModel registrationViewModel;
 
@@ -42,6 +45,12 @@ public class RegistrationFragment extends Fragment {
         return new RegistrationFragment();
     }
 
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        navigator = (Navigator) context;
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -52,6 +61,8 @@ public class RegistrationFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        navigator.setUpNavBar(true);
 
         registrationViewModel = new ViewModelProvider(this).get(RegistrationViewModel.class);
 
@@ -81,10 +92,7 @@ public class RegistrationFragment extends Fragment {
         } else if (authResult instanceof AuthError) {
             Toast.makeText(this.getContext(), ((AuthError) authResult).message, Toast.LENGTH_LONG).show();
         } else if (authResult instanceof AuthSuccess) {
-            Navigator navigator = (Navigator) this.getActivity();
-            if (navigator != null) {
-                navigator.navigateTo(HomeFragment.newInstance(), true);
-            }
+            navigator.navigateTo(ProfileFragment.newInstance());
         }
     }
 

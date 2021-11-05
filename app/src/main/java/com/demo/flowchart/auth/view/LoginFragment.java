@@ -1,5 +1,6 @@
 package com.demo.flowchart.auth.view;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,16 +19,16 @@ import com.demo.flowchart.auth.result.AuthError;
 import com.demo.flowchart.auth.result.AuthSuccess;
 import com.demo.flowchart.auth.result.EmailError;
 import com.demo.flowchart.auth.result.PasswordError;
-import com.demo.flowchart.home.view.HomeFragment;
 import com.demo.flowchart.auth.viewmodel.LoginViewModel;
 import com.demo.flowchart.navigation.Navigator;
 import com.demo.flowchart.R;
 import com.demo.flowchart.auth.result.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.demo.flowchart.profile.ProfileFragment;
 
 
 public class LoginFragment extends Fragment {
+
+    private Navigator navigator;
 
     private LoginViewModel loginViewModel;
 
@@ -41,6 +42,12 @@ public class LoginFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        navigator = (Navigator) context;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_login, container, false);
@@ -49,6 +56,8 @@ public class LoginFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        navigator.setUpNavBar(true);
 
         loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
 
@@ -66,7 +75,7 @@ public class LoginFragment extends Fragment {
         register.setOnClickListener(v -> {
             Navigator navigator = (Navigator) LoginFragment.this.getActivity();
             if (navigator != null) {
-                navigator.navigateTo(RegistrationFragment.newInstance(), false);
+                navigator.navigateTo(RegistrationFragment.newInstance());
             }
         });
     }
@@ -82,10 +91,7 @@ public class LoginFragment extends Fragment {
             Toast.makeText(this.getContext(), ((AuthError) authResult).message, Toast.LENGTH_LONG).show();
         }
         else if (authResult instanceof AuthSuccess) {
-            Navigator navigator = (Navigator) this.getActivity();
-            if (navigator != null) {
-                navigator.navigateTo(HomeFragment.newInstance(), true);
-            }
+            navigator.navigateTo(ProfileFragment.newInstance());
         }
     }
 

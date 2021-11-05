@@ -45,13 +45,13 @@ public class Flowline {
         WorkspacePoint topIn = endBlock.getTopIn();
 
         // If the endBlock is below the startBlock
-        if ((bottomOut.Y + MIN_LINE_LENGTH) < topIn.Y) {
+        if ((bottomOut.Y + MIN_LINE_LENGTH) <= topIn.Y) {
             bottomToTop(bottomOut, topIn);
         }
         // If above
         else {
             // If the endBlock is to the right of the startBlock
-            if ((rightOut.X + MIN_LINE_LENGTH) < leftIn.X) {
+            if ((rightOut.X + MIN_LINE_LENGTH) <= leftIn.X) {
                 rightToLeft(rightOut, leftIn);
             }
             // If is to the left
