@@ -1,47 +1,48 @@
 package com.demo.flowchart.auth.viewmodel;
 
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
-import com.demo.flowchart.auth.model.Auth;
-import com.demo.flowchart.auth.model.AuthImpl;
-import com.demo.flowchart.auth.util.AuthResult;
+import com.demo.flowchart.auth.AuthRepository;
+import com.demo.flowchart.auth.AuthValidation;
+import com.demo.flowchart.auth.result.AuthResult;
+import com.demo.flowchart.auth.result.EmailError;
+import com.demo.flowchart.auth.result.PasswordError;
+import com.demo.flowchart.auth.result.VerificationPasswordError;
 
-public class RegistrationViewModel {
-    Auth auth = new AuthImpl();
+public class RegistrationViewModel extends ViewModel {
 
-    public MutableLiveData<AuthResult> result = new MutableLiveData<>();
+    private AuthRepository authRepository = new AuthRepository();
+    public MutableLiveData<AuthResult> resultLiveData = authRepository.getResultLiveData();
+    public MutableLiveData<Boolean> loadingState = new MutableLiveData<>();
 
-    public void signUp(String email, String firstPassword, String secondPassword) {
-        if (auth.isEmailEmpty(email)) {
-            result.postValue(new AuthResult.EmailError());
-            return;
-        } else if (!auth.isValidEmail(email)) {
-            result.postValue(new AuthResult.EmailNotValid());
-            return;
+    public void signUp(String email, String password, String verificationPassword) {
+        email = email.trim();
+        password = password.trim();
+        verificationPassword = verificationPassword.trim();
+
+        loadingState.postValue(true);
+
+        if (AuthValidation.isEmailEmpty(email)) {
+            resultLiveData.postValue(new EmailError("Email не может быть пустым"));
         }
-        if (auth.isPasswordEmpty(firstPassword)) {
-            result.postValue(new AuthResult.PasswordError());
-            return;
-        } else if (!auth.isValidPassword(firstPassword)) {
-            result.postValue(new AuthResult.PasswordIsShorterThanSixCharacters());
-            return;
+        else if (!AuthValidation.isValidEmail(email)) {
+            resultLiveData.postValue(new EmailError("Неверный Email"));
         }
-        if (auth.isPasswordEmpty(secondPassword)) {
-            result.postValue(new AuthResult.PasswordError());
-            return;
-        } else if (!auth.isValidPassword(secondPassword)) {
-            result.postValue(new AuthResult.PasswordIsShorterThanSixCharacters());
-            return;
+        else if (AuthValidation.isPasswordEmpty(password)) {
+            resultLiveData.postValue(new PasswordError("Пароль не может быть пустым"));
         }
-        if (!auth.arePasswordsEqual(firstPassword, secondPassword)) {
-            result.postValue(new AuthResult.PasswordsAreNotEqual());
-            return;
+        else if (!AuthValidation.isValidPassword(password)) {
+            resultLiveData.postValue(new PasswordError("Длина пароля должна быть меньше 6 символов"));
         }
-        if (auth.signUp(email, firstPassword)) {
-            result.postValue(new AuthResult.AuthSuccess());
-        } else {
-            result.postValue(new AuthResult.AuthError());
+        else if (!AuthValidation.arePasswordsEqual(password, verificationPassword)) {
+            resultLiveData.postValue(new VerificationPasswordError("Пароли не совпадают"));
         }
+        else {
+            authRepository.register(email, password);
+        }
+
+        loadingState.postValue(false);
     }
 }
 

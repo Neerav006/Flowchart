@@ -1,4 +1,4 @@
-package com.demo.flowchart.drawing.model;
+package com.demo.flowchart.editor.model;
 
 import android.graphics.Path;
 import android.graphics.RectF;

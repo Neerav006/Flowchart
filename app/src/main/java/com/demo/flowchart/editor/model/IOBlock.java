@@ -1,4 +1,4 @@
-package com.demo.flowchart.drawing.model;
+package com.demo.flowchart.editor.model;
 
 public class IOBlock extends Block {
 

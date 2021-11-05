@@ -3,29 +3,40 @@ package com.demo.flowchart.auth.viewmodel;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.demo.flowchart.auth.model.Auth;
-import com.demo.flowchart.auth.model.AuthImpl;
-import com.demo.flowchart.auth.util.AuthResult;
+import com.demo.flowchart.auth.AuthRepository;
+import com.demo.flowchart.auth.AuthValidation;
+import com.demo.flowchart.auth.result.AuthResult;
+import com.demo.flowchart.auth.result.EmailError;
+import com.demo.flowchart.auth.result.PasswordError;
 
 public class LoginViewModel extends ViewModel {
-    Auth auth = new AuthImpl();
 
-    public MutableLiveData<AuthResult> result = new MutableLiveData<>();
+    private AuthRepository authRepository = new AuthRepository();
+    public MutableLiveData<AuthResult> resultLiveData = authRepository.getResultLiveData();
+    public MutableLiveData<Boolean> loadingState = new MutableLiveData<>();
 
     public void signIn(String email, String password) {
-        if (auth.isEmailEmpty(email)) {
-            result.postValue(new AuthResult.EmailError());
-            return;
-        }
-        if (auth.isPasswordEmpty(password)) {
-            result.postValue(new AuthResult.PasswordError());
-            return;
-        }
-        if (auth.signIn(email, password)) {
-            result.postValue(new AuthResult.AuthSuccess());
-        } else {
-            result.postValue(new AuthResult.AuthError());
-        }
-    }
+        email = email.trim();
+        password = password.trim();
 
+        loadingState.postValue(true);
+
+        if (AuthValidation.isEmailEmpty(email)) {
+            resultLiveData.postValue(new EmailError("Email не может быть пустым"));
+        }
+        else if (!AuthValidation.isValidEmail(email)) {
+            resultLiveData.postValue(new EmailError("Неверный Email"));
+        }
+        else if (AuthValidation.isPasswordEmpty(password)) {
+            resultLiveData.postValue(new PasswordError("Пароль не может быть пустым"));
+        }
+        else if (!AuthValidation.isValidPassword(password)) {
+            resultLiveData.postValue(new PasswordError("Длина пароля должна быть меньше 6 символов"));
+        }
+        else {
+            authRepository.login(email, password);
+        }
+
+        loadingState.postValue(false);
+    }
 }

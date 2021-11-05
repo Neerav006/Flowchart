@@ -1,14 +1,13 @@
-package com.demo.flowchart.drawing.model;
+package com.demo.flowchart.editor.model;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.RectF;
 
-import com.demo.flowchart.drawing.WorkspaceView;
-import com.demo.flowchart.drawing.util.WorkspacePoint;
+import com.demo.flowchart.editor.view.WorkspaceView;
+import com.demo.flowchart.editor.util.WorkspacePoint;
 
 public abstract class Block {
 

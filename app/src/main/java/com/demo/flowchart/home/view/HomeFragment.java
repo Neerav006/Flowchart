@@ -1,20 +1,20 @@
-package com.demo.flowchart;
+package com.demo.flowchart.home.view;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.fragment.app.Fragment;
 
-public class EditorFragment extends Fragment {
+import com.demo.flowchart.R;
 
-    public EditorFragment() {}
+public class HomeFragment extends Fragment {
 
-    public static EditorFragment newInstance() {
-        EditorFragment fragment = new EditorFragment();
+    public HomeFragment() {}
+
+    public static HomeFragment newInstance() {
+        HomeFragment fragment = new HomeFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -31,6 +31,7 @@ public class EditorFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_editor, container, false);
+        return inflater.inflate(R.layout.fragment_signing, container, false);
     }
+
 }

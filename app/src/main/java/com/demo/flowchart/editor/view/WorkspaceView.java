@@ -1,4 +1,4 @@
-package com.demo.flowchart.drawing;
+package com.demo.flowchart.editor.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -16,11 +16,11 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Toast;
 
-import com.demo.flowchart.drawing.model.Block;
-import com.demo.flowchart.drawing.model.PredefinedProcessBlock;
-import com.demo.flowchart.drawing.model.ProcessBlock;
-import com.demo.flowchart.drawing.model.TerminalBlock;
-import com.demo.flowchart.drawing.util.WorkspacePoint;
+import com.demo.flowchart.editor.model.Block;
+import com.demo.flowchart.editor.model.PredefinedProcessBlock;
+import com.demo.flowchart.editor.model.ProcessBlock;
+import com.demo.flowchart.editor.model.TerminalBlock;
+import com.demo.flowchart.editor.util.WorkspacePoint;
 
 import java.util.ArrayList;
 import java.util.List;
