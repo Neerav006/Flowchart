@@ -9,9 +9,14 @@ public class TerminalBlock  extends Block {
         super(startX, startY, width, height);
     }
 
+    public TerminalBlock() {
+        super();
+    }
+
     @Override
     protected void createContour() {
+        int radius = height / 2;
         RectF rectF = new RectF(startX, startY, startX + width, startY + height);
-        contour.addRoundRect(rectF, 20f, 20f, Path.Direction.CW);
+        contour.addRoundRect(rectF, radius, radius, Path.Direction.CW);
     }
 }

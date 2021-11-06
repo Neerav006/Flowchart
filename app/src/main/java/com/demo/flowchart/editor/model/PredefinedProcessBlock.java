@@ -6,10 +6,14 @@ public class PredefinedProcessBlock extends ProcessBlock {
         super(startX, startY, width, height);
     }
 
+    public PredefinedProcessBlock() {
+        super();
+    }
+
     @Override
     protected void createContour() {
         super.createContour();
-        int edgeWidth = 10;
+        int edgeWidth = 15;
         contour.moveTo(startX + edgeWidth, startY);
         contour.rLineTo(0, height);
         contour.moveTo(startX + width - edgeWidth, startY);

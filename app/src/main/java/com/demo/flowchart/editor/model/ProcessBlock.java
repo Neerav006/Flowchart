@@ -9,6 +9,10 @@ public class ProcessBlock extends Block {
         super(startX, startY, width, height);
     }
 
+    public ProcessBlock() {
+        super();
+    }
+
     @Override
     protected void createContour() {
         RectF rectF = new RectF(startX, startY, startX + width, startY + height);

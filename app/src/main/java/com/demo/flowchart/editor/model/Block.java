@@ -2,6 +2,7 @@ package com.demo.flowchart.editor.model;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -10,6 +11,9 @@ import com.demo.flowchart.editor.view.WorkspaceView;
 import com.demo.flowchart.editor.util.WorkspacePoint;
 
 public abstract class Block {
+
+    private static final int DEFAULT_WIDTH = 120;
+    private static final int DEFAULT_HEIGHT = 80;
 
     protected int startX;
     protected int startY;
@@ -27,6 +31,10 @@ public abstract class Block {
 
     private final  Paint fillPaint;
     private final  Paint boundsPaint;
+
+    public Block() {
+        this(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    }
 
     protected Block(int startX, int startY, int width, int height) {
         this.startX = startX;
@@ -52,6 +60,14 @@ public abstract class Block {
         boundsPaint = new Paint();
         boundsPaint.setColor(Color.MAGENTA);
         boundsPaint.setStyle(Paint.Style.FILL);
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public WorkspacePoint getLeftIn() {
@@ -84,7 +100,7 @@ public abstract class Block {
 
     public void draw(Canvas canvas, Paint contourPaint) {
         createShape();
-        canvas.drawRect(bounds, boundsPaint);
+//        canvas.drawRect(bounds, boundsPaint);
         canvas.drawPath(contour, fillPaint);
         canvas.drawPath(contour, contourPaint);
 

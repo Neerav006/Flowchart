@@ -7,14 +7,14 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_blocks"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
+        android:layout_width="90dp"
+        android:layout_height="0dp"
         tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:orientation="horizontal"
+        tools:orientation="vertical"
         tools:listitem="@layout/block_item"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/view_workspace"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/view_workspace"
         app:layout_constraintStart_toStartOf="parent">
 
     </androidx.recyclerview.widget.RecyclerView>
@@ -33,9 +33,9 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/rv_blocks"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/rv_blocks">
+        app:layout_constraintTop_toTopOf="parent">
 
     </com.demo.flowchart.editor.view.WorkspaceView>
 

@@ -1,37 +1,53 @@
 package com.demo.flowchart.editor.view;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.demo.flowchart.R;
+import com.demo.flowchart.editor.model.Block;
+import com.demo.flowchart.editor.model.DecisionBlock;
+import com.demo.flowchart.editor.model.IOBlock;
+import com.demo.flowchart.editor.model.PredefinedProcessBlock;
+import com.demo.flowchart.editor.model.ProcessBlock;
+import com.demo.flowchart.editor.model.TerminalBlock;
 import com.demo.flowchart.navigation.Navigator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class EditorFragment extends Fragment {
 
     private Navigator navigator;
+    private RecyclerView blocksRecycler;
+    private BlockAdapter blockAdapter;
+    private LinearLayoutManager layoutManager;
+    private List<Block> blocks;
 
     public EditorFragment() {}
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        navigator = (Navigator) context;
-    }
 
     public static EditorFragment newInstance() {
         EditorFragment fragment = new EditorFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        navigator = (Navigator) context;
     }
 
     @Override
@@ -52,5 +68,27 @@ public class EditorFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         navigator.setUpNavBar(false);
+
+        blocksRecycler = view.findViewById(R.id.rv_blocks);
+        // test
+        setUpRecycler();
+
+
+    }
+
+    private void setUpRecycler() {
+        int orientation = Configuration.ORIENTATION_PORTRAIT;
+        if (getContext() != null) {
+            orientation = this.getContext().getResources().getConfiguration().orientation;
+        }
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            layoutManager = new LinearLayoutManager(this.getContext(), LinearLayoutManager.HORIZONTAL, false);
+        } else {
+            layoutManager = new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false);
+        }
+        blocksRecycler.setLayoutManager(layoutManager);
+        blockAdapter = new BlockAdapter();
+        blockAdapter.setHasStableIds(true);
+        blocksRecycler.setAdapter(blockAdapter);
     }
 }

@@ -6,6 +6,10 @@ public class DecisionBlock extends Block {
         super(startX, startY, width, height);
     }
 
+    public DecisionBlock() {
+        super();
+    }
+
     @Override
     protected void createContour() {
         int halfWidth = width / 2;

@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.AttributeSet;
+import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -25,7 +26,7 @@ import com.demo.flowchart.editor.util.WorkspacePoint;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WorkspaceView extends View {
+public class WorkspaceView extends View implements View.OnDragListener {
 
     public static final int GRID_STEP_SMALL = 10;
 
@@ -142,9 +143,9 @@ public class WorkspaceView extends View {
         super.onLayout(changed, left, top, right, bottom);
 
         if (right >= bottom) {
-            minScale = (float) right / WORKSPACE_WIDTH;
+            minScale = (float) (right - left) / WORKSPACE_WIDTH;
         } else {
-            minScale = (float) bottom / WORKSPACE_HEIGHT;
+            minScale = (float) (bottom - top) / WORKSPACE_HEIGHT;
         }
         minXOffset = right - Math.round(WORKSPACE_WIDTH * PRE_SCALE);
         minYOffset = bottom - Math.round(WORKSPACE_HEIGHT * PRE_SCALE);
@@ -174,20 +175,6 @@ public class WorkspaceView extends View {
                 block.draw(canvas, selectedPaint);
             } else {
                 block.draw(canvas, blockPaint);
-            }
-        }
-    }
-
-    private void drawGrid(Canvas canvas) {
-        for (int x = 0; x <= WORKSPACE_WIDTH; x += GRID_STEP_SMALL) {
-            for (int y = 0; y <= WORKSPACE_HEIGHT; y += GRID_STEP_SMALL) {
-                if (x % GRID_STEP_LARGE == 0 && y % GRID_STEP_LARGE == 0) {
-                    gridPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
-                } else {
-                    gridPaint.setStrokeWidth(THIN_LINE_WIDTH / scale);
-                }
-                canvas.drawLine(0, y, WORKSPACE_WIDTH, y, gridPaint);
-                canvas.drawLine(x, 0, x, WORKSPACE_HEIGHT, gridPaint);
             }
         }
     }
@@ -263,6 +250,14 @@ public class WorkspaceView extends View {
         return true;
     }
 
+    @Override
+    public boolean onDrag(View v, DragEvent event) {
+        if (event.getAction() == DragEvent.ACTION_DROP) {
+
+        }
+        return true;
+    }
+
     private class WorkspaceScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
@@ -313,6 +308,20 @@ public class WorkspaceView extends View {
         @Override
         public boolean onFling(MotionEvent downEvent, MotionEvent flingEvent, float velocityX, float velocityY) {
             return false;
+        }
+    }
+
+    private void drawGrid(Canvas canvas) {
+        for (int x = 0; x <= WORKSPACE_WIDTH; x += GRID_STEP_SMALL) {
+            for (int y = 0; y <= WORKSPACE_HEIGHT; y += GRID_STEP_SMALL) {
+                if (x % GRID_STEP_LARGE == 0 && y % GRID_STEP_LARGE == 0) {
+                    gridPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
+                } else {
+                    gridPaint.setStrokeWidth(THIN_LINE_WIDTH / scale);
+                }
+                canvas.drawLine(0, y, WORKSPACE_WIDTH, y, gridPaint);
+                canvas.drawLine(x, 0, x, WORKSPACE_HEIGHT, gridPaint);
+            }
         }
     }
 

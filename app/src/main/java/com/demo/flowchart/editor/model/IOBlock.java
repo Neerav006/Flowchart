@@ -6,6 +6,10 @@ public class IOBlock extends Block {
         super(startX, startY, width, height);
     }
 
+    public IOBlock() {
+        super();
+    }
+
     @Override
     protected void createContour() {
         int shift = 20;

@@ -33,7 +33,6 @@ public class MainActivity extends AppCompatActivity implements Navigator {
     private BottomAppBar bottomAppBar;
     private NavigationBarView bottomNavigationView;
     private FloatingActionButton fabCreateProject;
-    private int lastSelectedItemId = 0;
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -46,8 +45,6 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         if (savedInstanceState == null) {
             navigateTo(HomeFragment.newInstance());
         }
-
-        bottomAppBar = findViewById(R.id.bottom_app_bar);
 
         bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setBackground(null);
@@ -65,6 +62,11 @@ public class MainActivity extends AppCompatActivity implements Navigator {
                     return true;
             }
             return false;
+        });
+
+        fabCreateProject = findViewById(R.id.fab_create);
+        fabCreateProject.setOnClickListener(v -> {
+            navigateTo(EditorFragment.newInstance());
         });
     }
 
@@ -97,14 +99,8 @@ public class MainActivity extends AppCompatActivity implements Navigator {
     public void setUpNavBar(boolean visibility) {
         CoordinatorLayout cl = findViewById(R.id.bottom_navigation);
         if (visibility) {
-//            bottomAppBar.setVisibility(View.VISIBLE);
-//            bottomNavigationView.setVisibility(View.VISIBLE);
-//            fabCreateProject.setVisibility(View.VISIBLE);
             cl.setVisibility(View.VISIBLE);
         } else {
-//            bottomAppBar.setVisibility(View.GONE);
-//            bottomNavigationView.setVisibility(View.GONE);
-//            fabCreateProject.setVisibility(View.GONE);
             cl.setVisibility(View.GONE);
         }
     }
