@@ -192,6 +192,8 @@ public class WorkspaceView extends View {
         }
     }
 
+
+
     // TODO Make it prettier
     @Override
     public boolean onTouchEvent(MotionEvent event) {

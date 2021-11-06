@@ -11,25 +11,28 @@ import androidx.lifecycle.LiveData;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.TextView;
 
 import com.demo.flowchart.R;
 import com.demo.flowchart.auth.AuthRepository;
 import com.demo.flowchart.auth.view.LoginFragment;
-import com.demo.flowchart.editor.view.EditorFragment;
-import com.demo.flowchart.home.HomeFragment;
 import com.demo.flowchart.navigation.Navigator;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
 public class ProfileFragment extends Fragment {
 
     private Navigator navigator;
-    private Button logOut;
-    private Button edtior;
+
+    private FloatingActionButton fabLogout;
+    private TextView email;
+    private TextView uploadsCount;
 
     private LiveData<Boolean> isLoggedOutLiveData;
+    private AuthRepository repo;
 
-    public ProfileFragment() {}
+    public ProfileFragment() {
+    }
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -50,27 +53,29 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-
-        AuthRepository repo = new AuthRepository();
+        fabLogout = view.findViewById(R.id.fab_logout);
+        email = view.findViewById(R.id.profile_email);
+        uploadsCount = view.findViewById(R.id.profile_projects_upload_count);
+        repo = new AuthRepository();
         isLoggedOutLiveData = repo.getLoggedOutLiveData();
 
         navigator.setUpNavBar(true);
-        logOut = view.findViewById(R.id.btn_profile_logout);
-        edtior = view.findViewById(R.id.btn_profile_editor);
 
-        logOut.setOnClickListener(v -> {
-            repo.signOut();
-        });
+        email.setText(repo.getUserEmail());
 
-        edtior.setOnClickListener(v -> {
-            navigator.navigateTo(EditorFragment.newInstance());
-        });
-
+        fabLogout.setOnClickListener(v-> repo.signOut());
         isLoggedOutLiveData.observe(this.getViewLifecycleOwner(), b -> {
             if (b) {
                 navigator.navigateTo(LoginFragment.newInstance());
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        fabLogout = null;
+        email = null;
+        uploadsCount = null;
     }
 }
