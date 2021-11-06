@@ -1,6 +1,7 @@
 package com.demo.flowchart.editor.view;
 
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,16 +33,6 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
     public BlockViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View blockView = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.block_item, parent, false);
-
-        blockView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                ClipData.Item item = new ClipData.Item(String.valueOf(view.getTag()));
-
-                return false;
-            }
-        });
-
         return new BlockViewHolder(blockView);
     }
 
@@ -57,12 +48,31 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
 
     protected static class BlockViewHolder extends RecyclerView.ViewHolder {
 
+        BlockView blockView;
+
         public BlockViewHolder(@NonNull View itemView) {
             super(itemView);
+            this.blockView = (BlockView) itemView;
         }
 
         protected void bind(Block block) {
-            ((BlockView) itemView).setBlock(block);
+            blockView.setBlock(block);
+            blockView.setTag(block.getClass().getSimpleName());
+
+            blockView.setOnLongClickListener(view -> {
+
+                ClipData.Item item = new ClipData.Item((String.valueOf(view.getTag())));
+                ClipData data = new ClipData(
+                        String.valueOf(view.getTag()),
+                        new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN},
+                        item
+                );
+                View.DragShadowBuilder shadow = new View.DragShadowBuilder(view);
+                return view.startDrag(
+                        data, shadow, null, 0
+                );
+            });
+
         }
     }
 

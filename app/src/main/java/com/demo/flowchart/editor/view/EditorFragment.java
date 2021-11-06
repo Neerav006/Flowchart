@@ -10,30 +10,24 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.demo.flowchart.R;
-import com.demo.flowchart.editor.model.Block;
-import com.demo.flowchart.editor.model.DecisionBlock;
-import com.demo.flowchart.editor.model.IOBlock;
-import com.demo.flowchart.editor.model.PredefinedProcessBlock;
-import com.demo.flowchart.editor.model.ProcessBlock;
-import com.demo.flowchart.editor.model.TerminalBlock;
 import com.demo.flowchart.navigation.Navigator;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 
-public class EditorFragment extends Fragment {
+public class EditorFragment extends Fragment implements View.OnDragListener {
 
     private Navigator navigator;
     private RecyclerView blocksRecycler;
     private BlockAdapter blockAdapter;
     private LinearLayoutManager layoutManager;
-    private List<Block> blocks;
+    private FloatingActionButton buttonSave;
 
     public EditorFragment() {}
 
@@ -51,14 +45,6 @@ public class EditorFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            // Get params
-        }
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_editor, container, false);
@@ -70,10 +56,16 @@ public class EditorFragment extends Fragment {
         navigator.setUpNavBar(false);
 
         blocksRecycler = view.findViewById(R.id.rv_blocks);
-        // test
+        buttonSave = view.findViewById(R.id.fab_save_project);
         setUpRecycler();
+    }
 
-
+    @Override
+    public boolean onDrag(View v, DragEvent event) {
+        if (event.getAction() == DragEvent.ACTION_DROP) {
+            Toast.makeText(this.getContext(), "DROP", Toast.LENGTH_SHORT).show();
+        }
+        return false;
     }
 
     private void setUpRecycler() {

@@ -15,14 +15,17 @@ public abstract class Block {
     private static final int DEFAULT_WIDTH = 120;
     private static final int DEFAULT_HEIGHT = 80;
 
+    protected long id;
     protected int startX;
     protected int startY;
     protected int width;
     protected int height;
 
+    protected String text;
+    protected Flowline flowline;
+
     protected final Path contour;
     protected final RectF bounds;
-    protected Flowline flowline;
 
     private final WorkspacePoint leftIn;
     private final WorkspacePoint topIn;
@@ -32,19 +35,7 @@ public abstract class Block {
     private final  Paint fillPaint;
     private final  Paint boundsPaint;
 
-    public Block() {
-        this(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-    }
-
-    protected Block(int startX, int startY, int width, int height) {
-        this.startX = startX;
-        this.startY = startY;
-        this.width = width;
-        this.height = height;
-
-        adjustSize();
-        bindToGrid();
-
+    {
         contour = new Path();
         bounds = new RectF();
 
@@ -60,6 +51,24 @@ public abstract class Block {
         boundsPaint = new Paint();
         boundsPaint.setColor(Color.MAGENTA);
         boundsPaint.setStyle(Paint.Style.FILL);
+    }
+
+    public Block(int startX, int startY) {
+        this(startX, startY, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    }
+
+    public Block() {
+        this(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+    }
+
+    protected Block(int startX, int startY, int width, int height) {
+        this.startX = startX;
+        this.startY = startY;
+        this.width = width;
+        this.height = height;
+
+        adjustSize();
+        bindToGrid();
     }
 
     public int getWidth() {

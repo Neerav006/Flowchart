@@ -1,5 +1,6 @@
 package com.demo.flowchart.editor.view;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -18,6 +19,8 @@ import android.view.ViewConfiguration;
 import android.widget.Toast;
 
 import com.demo.flowchart.editor.model.Block;
+import com.demo.flowchart.editor.model.DecisionBlock;
+import com.demo.flowchart.editor.model.IOBlock;
 import com.demo.flowchart.editor.model.PredefinedProcessBlock;
 import com.demo.flowchart.editor.model.ProcessBlock;
 import com.demo.flowchart.editor.model.TerminalBlock;
@@ -37,8 +40,8 @@ public class WorkspaceView extends View implements View.OnDragListener {
     private static final int MAX_X_OFFSET = 0;
     private static final int MAX_Y_OFFSET = 0;
 
-    private static final float PRE_SCALE = 4f;
-    private static final float MAX_SCALE = 10f;
+    private static final float PRE_SCALE = 3f;
+    private static final float MAX_SCALE = 6f;
     private static final float DOUBLE_TAP_SCALE_FACTOR = 1.5f;
 
     private static final float BOLD_LINE_WIDTH = 8f;
@@ -69,7 +72,7 @@ public class WorkspaceView extends View implements View.OnDragListener {
     private long lastDownTime;
     private boolean isLongPressed;
 
-    private final Matrix gridMatrix;
+    private final Matrix workspaceMatrix;
     private final Paint blockPaint;
     private final Paint gridPaint;
 
@@ -78,27 +81,11 @@ public class WorkspaceView extends View implements View.OnDragListener {
     private final Paint movablePaint;
     private final Paint selectedPaint;
 
-    private List<Block> blocks;
-
-    private void setTestBlocks() {
-        TerminalBlock test1 = new TerminalBlock(20, 20, 120, 80);
-//        DecisionBlock test2 = new DecisionBlock(40, 120, 180, 80);
-        ProcessBlock test3 = new PredefinedProcessBlock(120, 240, 120, 80);
-//        IOBlock test4 = new IOBlock(40, 340, 120, 80);
-        ProcessBlock test5 = new ProcessBlock(240, 480, 120, 80);
-//        ProcessBlock test6 = new ProcessBlock(60, 140, 120, 80);
-
-        blocks = new ArrayList<>();
-        blocks.add(test1);
-//        blocks.add(test2);
-        blocks.add(test3);
-//        blocks.add(test4);
-        blocks.add(test5);
-//        blocks.add(test6);
-    }
+    private final List<Block> blocks;
 
     public WorkspaceView(Context context, AttributeSet attrs) {
         super(context);
+
         this.context = context;
         this.vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
@@ -110,7 +97,7 @@ public class WorkspaceView extends View implements View.OnDragListener {
         gestureDetector = new GestureDetector(this.getContext(), new WorkspaceGestureListener());
         gestureDetector.setIsLongpressEnabled(false);
 
-        gridMatrix = new Matrix();
+        workspaceMatrix = new Matrix();
         blockPaint = new Paint();
         blockPaint.setColor(Color.BLACK);
         blockPaint.setStyle(Paint.Style.STROKE);
@@ -135,7 +122,8 @@ public class WorkspaceView extends View implements View.OnDragListener {
         selectedPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
         selectedPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
-        setTestBlocks();
+        setOnDragListener(this);
+        blocks = new ArrayList<>();
     }
 
     @Override
@@ -251,10 +239,20 @@ public class WorkspaceView extends View implements View.OnDragListener {
     }
 
     @Override
-    public boolean onDrag(View v, DragEvent event) {
-        if (event.getAction() == DragEvent.ACTION_DROP) {
-
+    public boolean onDrag(View view, DragEvent dragEvent) {
+        if (scaleGestureDetector.isInProgress()) {
+            return false;
         }
+
+        if (dragEvent.getAction() == DragEvent.ACTION_DROP) {
+            updateWorkspaceMatrix();
+            WorkspacePoint point = new WorkspacePoint(dragEvent, workspaceMatrix);
+
+            ClipData.Item item = dragEvent.getClipData().getItemAt(0);
+            String data = item.getText().toString();
+            addBlock(data, point);
+        }
+        invalidate();
         return true;
     }
 
@@ -333,23 +331,44 @@ public class WorkspaceView extends View implements View.OnDragListener {
         invalidate();
     }
 
-    private void moveBlock(float dX, float dY) {
-        touchedBlock.move(dX / scale, dY / scale);
-        invalidate();
-    }
-
     private void moveWorkspace(float dX, float dY) {
         xOffset -= Math.round(dX);
         yOffset -= Math.round(dY);
         invalidate();
     }
 
+    private void addBlock(String blockClassName, WorkspacePoint startPoint) {
+        int startX = startPoint.X;
+        int startY = startPoint.Y;
+        Block block = null;
+        if (blockClassName.equals(TerminalBlock.class.getSimpleName())) {
+            block = new TerminalBlock(startX, startY, 120, 80);
+        }
+        else if (blockClassName.equals(ProcessBlock.class.getSimpleName())) {
+            block = new ProcessBlock(startX, startY, 120, 80);
+        }
+        else if (blockClassName.equals(PredefinedProcessBlock.class.getSimpleName())) {
+            block = new PredefinedProcessBlock(startX, startY, 120, 80);
+        }
+        else if (blockClassName.equals(DecisionBlock.class.getSimpleName())) {
+            block = new DecisionBlock(startX, startY, 120, 80);
+        }
+        else if (blockClassName.equals(IOBlock.class.getSimpleName())) {
+            block = new IOBlock(startX, startY, 120, 80);
+        }
+        if (block != null) {
+            blocks.add(block);
+        }
+    }
+
+    private void moveBlock(float dX, float dY) {
+        touchedBlock.move(dX / scale, dY / scale);
+        invalidate();
+    }
+
     private void searchTouchedBlock(MotionEvent downEvent) {
-        gridMatrix.reset();
-        gridMatrix.preScale(scale, scale);
-        gridMatrix.postTranslate(xOffset, yOffset);
-        gridMatrix.invert(gridMatrix);
-        WorkspacePoint workspacePoint = new WorkspacePoint(downEvent, gridMatrix);
+        updateWorkspaceMatrix();
+        WorkspacePoint workspacePoint = new WorkspacePoint(downEvent, workspaceMatrix);
 
         touchedBlock = null;
         for (Block block : blocks) {
@@ -363,6 +382,13 @@ public class WorkspaceView extends View implements View.OnDragListener {
             blocks.remove(touchedBlock);
             blocks.add(touchedBlock);
         }
+    }
+
+    private void updateWorkspaceMatrix() {
+        workspaceMatrix.reset();
+        workspaceMatrix.preScale(scale, scale);
+        workspaceMatrix.postTranslate(xOffset, yOffset);
+        workspaceMatrix.invert(workspaceMatrix);
     }
 
     private void vibrateOnBlockMovable() {

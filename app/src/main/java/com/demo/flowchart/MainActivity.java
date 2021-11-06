@@ -7,6 +7,8 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.DragEvent;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -21,11 +23,18 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class MainActivity extends AppCompatActivity implements Navigator {
+public class MainActivity extends AppCompatActivity implements Navigator, View.OnDragListener {
 
     private CoordinatorLayout bottomNavBarContainer;
     private NavigationBarView bottomNavigationView;
     private FloatingActionButton fabCreateProject;
+
+    @Override
+    public boolean onDrag(View v, DragEvent event) {
+
+        Log.d("WorkspaceView", "DRAG");
+        return false;
+    }
 
     @SuppressLint("NonConstantResourceId")
     @Override

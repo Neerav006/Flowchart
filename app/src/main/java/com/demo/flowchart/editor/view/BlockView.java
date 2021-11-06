@@ -10,12 +10,13 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import com.demo.flowchart.editor.model.Block;
-import com.demo.flowchart.editor.model.PredefinedProcessBlock;
-import com.demo.flowchart.editor.model.ProcessBlock;
 
 public class BlockView extends View {
 
-    Block block;
+    private static final float MAGIC_NUMBER_ONE = 0.25f;
+    private static final float MAGIC_NUMBER_TWO = 6;
+
+    public Block block;
     Paint paint = new Paint();
 
     public BlockView(Context context, @Nullable AttributeSet attrs) {
@@ -36,8 +37,8 @@ public class BlockView extends View {
         super.onDraw(canvas);
         float scaleX = (float) getWidth() / block.getWidth();
         float scaleY = (float) getHeight() / block.getHeight();
-        canvas.scale(scaleX-0.25f, scaleY-0.25f);
-        canvas.translate(6, 6);
+        canvas.scale(scaleX - MAGIC_NUMBER_ONE, scaleY - MAGIC_NUMBER_ONE);
+        canvas.translate(MAGIC_NUMBER_TWO, MAGIC_NUMBER_TWO);
         block.draw(canvas, paint);
     }
 }

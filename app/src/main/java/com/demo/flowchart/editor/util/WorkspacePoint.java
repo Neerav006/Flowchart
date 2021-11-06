@@ -1,6 +1,7 @@
 package com.demo.flowchart.editor.util;
 
 import android.graphics.Matrix;
+import android.view.DragEvent;
 import android.view.MotionEvent;
 
 public class WorkspacePoint {
@@ -15,6 +16,13 @@ public class WorkspacePoint {
     }
 
     public WorkspacePoint(MotionEvent event, Matrix matrix) {
+        float[] point = new float[]{event.getX(), event.getY()};
+        matrix.mapPoints(point);
+        this.X = Math.round(point[0]);
+        this.Y =  Math.round(point[1]);
+    }
+
+    public WorkspacePoint(DragEvent event, Matrix matrix) {
         float[] point = new float[]{event.getX(), event.getY()};
         matrix.mapPoints(point);
         this.X = Math.round(point[0]);
