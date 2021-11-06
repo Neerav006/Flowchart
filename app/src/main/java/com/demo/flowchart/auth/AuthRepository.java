@@ -5,16 +5,20 @@ import androidx.lifecycle.MutableLiveData;
 import com.demo.flowchart.auth.result.AuthResult;
 import com.demo.flowchart.auth.result.AuthError;
 import com.demo.flowchart.auth.result.AuthSuccess;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class AuthRepository {
 
     private final FirebaseAuth auth;
+    private final FirebaseUser user;
     private final MutableLiveData<AuthResult> resultLiveData;
     private final MutableLiveData<Boolean> loggedOutLiveData;
 
     public AuthRepository() {
         auth = FirebaseAuth.getInstance();
+        user = auth.getCurrentUser();
         resultLiveData = new MutableLiveData<>();
         loggedOutLiveData = new MutableLiveData<>();
 
@@ -47,6 +51,11 @@ public class AuthRepository {
     public void signOut() {
         auth.signOut();
         loggedOutLiveData.postValue(true);
+    }
+
+    public String getUserEmail() {
+        assert user != null;
+        return user.getEmail();
     }
 
     public MutableLiveData<AuthResult> getResultLiveData() {

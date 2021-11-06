@@ -14,14 +14,12 @@ public class RegistrationViewModel extends ViewModel {
 
     private final AuthRepository authRepository = new AuthRepository();
     public MutableLiveData<AuthResult> resultLiveData = authRepository.getResultLiveData();
-    public MutableLiveData<Boolean> loadingState = new MutableLiveData<>();
 
     public void signUp(String email, String password, String verificationPassword) {
         email = email.trim();
         password = password.trim();
         verificationPassword = verificationPassword.trim();
 
-        loadingState.postValue(true);
 
         if (AuthValidation.isEmailEmpty(email)) {
             resultLiveData.postValue(new EmailError("Email не может быть пустым"));
@@ -41,8 +39,6 @@ public class RegistrationViewModel extends ViewModel {
         else {
             authRepository.register(email, password);
         }
-
-        loadingState.postValue(false);
     }
 }
 

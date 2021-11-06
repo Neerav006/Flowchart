@@ -13,13 +13,10 @@ public class LoginViewModel extends ViewModel {
 
     private final AuthRepository authRepository = new AuthRepository();
     public MutableLiveData<AuthResult> resultLiveData = authRepository.getResultLiveData();
-    public MutableLiveData<Boolean> loadingState = new MutableLiveData<>();
 
     public void signIn(String email, String password) {
         email = email.trim();
         password = password.trim();
-
-        loadingState.postValue(true);
 
         if (AuthValidation.isEmailEmpty(email)) {
             resultLiveData.postValue(new EmailError("Email не может быть пустым"));
@@ -36,7 +33,5 @@ public class LoginViewModel extends ViewModel {
         else {
             authRepository.login(email, password);
         }
-
-        loadingState.postValue(false);
     }
 }

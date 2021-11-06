@@ -1,6 +1,5 @@
 package com.demo.flowchart;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
@@ -8,10 +7,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -22,15 +17,13 @@ import com.demo.flowchart.editor.view.EditorFragment;
 import com.demo.flowchart.home.HomeFragment;
 import com.demo.flowchart.navigation.Navigator;
 import com.demo.flowchart.profile.ProfileFragment;
-import com.google.android.material.bottomappbar.BottomAppBar;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class MainActivity extends AppCompatActivity implements Navigator {
 
-    private BottomAppBar bottomAppBar;
+    private CoordinatorLayout bottomNavBarContainer;
     private NavigationBarView bottomNavigationView;
     private FloatingActionButton fabCreateProject;
 
@@ -39,6 +32,9 @@ public class MainActivity extends AppCompatActivity implements Navigator {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        fabCreateProject = findViewById(R.id.fab_create);
+        bottomNavigationView = findViewById(R.id.bottom_nav_view);
+        bottomNavigationView.setBackground(null);
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
 
@@ -46,8 +42,8 @@ public class MainActivity extends AppCompatActivity implements Navigator {
             navigateTo(HomeFragment.newInstance());
         }
 
-        bottomNavigationView = findViewById(R.id.bottom_nav_view);
-        bottomNavigationView.setBackground(null);
+        fabCreateProject.setOnClickListener(v -> navigateTo(EditorFragment.newInstance()));
+
         bottomNavigationView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
                 case R.id.item_home:
@@ -62,11 +58,6 @@ public class MainActivity extends AppCompatActivity implements Navigator {
                     return true;
             }
             return false;
-        });
-
-        fabCreateProject = findViewById(R.id.fab_create);
-        fabCreateProject.setOnClickListener(v -> {
-            navigateTo(EditorFragment.newInstance());
         });
     }
 
@@ -97,11 +88,19 @@ public class MainActivity extends AppCompatActivity implements Navigator {
 
     @Override
     public void setUpNavBar(boolean visibility) {
-        CoordinatorLayout cl = findViewById(R.id.bottom_navigation);
+        bottomNavBarContainer = findViewById(R.id.bottom_navigation);
         if (visibility) {
-            cl.setVisibility(View.VISIBLE);
+            bottomNavBarContainer.setVisibility(View.VISIBLE);
         } else {
-            cl.setVisibility(View.GONE);
+            bottomNavBarContainer.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        bottomNavigationView = null;
+        fabCreateProject = null;
+        bottomNavBarContainer = null;
     }
 }
