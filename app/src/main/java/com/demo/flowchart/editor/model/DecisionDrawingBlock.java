@@ -1,12 +1,12 @@
 package com.demo.flowchart.editor.model;
 
-public class DecisionBlock extends Block {
+public class DecisionDrawingBlock extends DrawingBlock {
 
-    public DecisionBlock(int startX, int startY, int width, int height) {
+    public DecisionDrawingBlock(int startX, int startY, int width, int height) {
         super(startX, startY, width, height);
     }
 
-    public DecisionBlock() {
+    public DecisionDrawingBlock() {
         super();
     }
 

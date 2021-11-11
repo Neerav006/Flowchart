@@ -18,12 +18,12 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Toast;
 
-import com.demo.flowchart.editor.model.Block;
-import com.demo.flowchart.editor.model.DecisionBlock;
-import com.demo.flowchart.editor.model.IOBlock;
-import com.demo.flowchart.editor.model.PredefinedProcessBlock;
-import com.demo.flowchart.editor.model.ProcessBlock;
-import com.demo.flowchart.editor.model.TerminalBlock;
+import com.demo.flowchart.editor.model.DecisionDrawingBlock;
+import com.demo.flowchart.editor.model.DrawingBlock;
+import com.demo.flowchart.editor.model.IODrawingBlock;
+import com.demo.flowchart.editor.model.PredefinedProcessDrawingBlock;
+import com.demo.flowchart.editor.model.ProcessDrawingBlock;
+import com.demo.flowchart.editor.model.TerminalDrawingBlock;
 import com.demo.flowchart.editor.util.WorkspacePoint;
 
 import java.util.ArrayList;
@@ -50,6 +50,8 @@ public class WorkspaceView extends View implements View.OnDragListener {
     private static final int HOLD_DOWN_ALLOWABLE_OFFSET = 5;
     private static final long LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
 
+    private static long currentId;
+
     private final Context context;
     private final Vibrator vibrator;
 
@@ -62,8 +64,8 @@ public class WorkspaceView extends View implements View.OnDragListener {
     private final ScaleGestureDetector scaleGestureDetector;
     private final GestureDetector gestureDetector;
 
-    private Block touchedBlock;
-    private Block selectedBlock;
+    private DrawingBlock touchedDrawingBlock;
+    private DrawingBlock selectedDrawingBlock;
     private boolean isBlockMovable;
     private boolean isBlockClicked;
     private boolean isDoubleTaped;
@@ -81,10 +83,10 @@ public class WorkspaceView extends View implements View.OnDragListener {
     private final Paint movablePaint;
     private final Paint selectedPaint;
 
-    private final List<Block> blocks;
+    private List<DrawingBlock> drawingBlocks;
 
     public WorkspaceView(Context context, AttributeSet attrs) {
-        super(context);
+        super(context, attrs);
 
         this.context = context;
         this.vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
@@ -123,7 +125,16 @@ public class WorkspaceView extends View implements View.OnDragListener {
         selectedPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         setOnDragListener(this);
-        blocks = new ArrayList<>();
+        drawingBlocks = new ArrayList<>();
+    }
+
+    public void setDrawingBlocks(List<DrawingBlock> drawingBlocks) {
+        this.drawingBlocks = drawingBlocks;
+        invalidate();
+    }
+
+    public List<DrawingBlock> getDrawingBlocks() {
+        return this.drawingBlocks;
     }
 
     @Override
@@ -151,18 +162,18 @@ public class WorkspaceView extends View implements View.OnDragListener {
 
         drawGrid(canvas);
 
-        for (Block block : blocks) {
+        for (DrawingBlock drawingBlock : drawingBlocks) {
             // Test
-            if (touchedBlock != null && block == touchedBlock) {
+            if (touchedDrawingBlock != null && drawingBlock == touchedDrawingBlock) {
                 if (isBlockMovable) {
-                    block.draw(canvas, movablePaint);
+                    drawingBlock.draw(canvas, movablePaint);
                 } else {
-                    block.draw(canvas, touchedPaint);
+                    drawingBlock.draw(canvas, touchedPaint);
                 }
-            } else if (selectedBlock != null && block == selectedBlock) {
-                block.draw(canvas, selectedPaint);
+            } else if (selectedDrawingBlock != null && drawingBlock == selectedDrawingBlock) {
+                drawingBlock.draw(canvas, selectedPaint);
             } else {
-                block.draw(canvas, blockPaint);
+                drawingBlock.draw(canvas, blockPaint);
             }
         }
     }
@@ -198,38 +209,38 @@ public class WorkspaceView extends View implements View.OnDragListener {
                     vibrator.cancel();
                 }
                 // Set a scroll mode for the gestureDetector's onScroll method
-                isBlockMovable = isLongPressed && (touchedBlock != null);
+                isBlockMovable = isLongPressed && (touchedDrawingBlock != null);
                 break;
             }
             case MotionEvent.ACTION_UP: {
                 if (!isLongTime && !isLongPressed && !isDoubleTaped) {
                     searchTouchedBlock(event);
-                    if (touchedBlock != null) {
-                        if (selectedBlock != null) {
-                            if (touchedBlock != selectedBlock) {
-                                selectedBlock.setOrRemoveFlowline(touchedBlock);
+                    if (touchedDrawingBlock != null) {
+                        if (selectedDrawingBlock != null) {
+                            if (touchedDrawingBlock != selectedDrawingBlock) {
+                                selectedDrawingBlock.setOrRemoveFlowline(touchedDrawingBlock);
                                 invalidate();
-                                touchedBlock = null;
+                                touchedDrawingBlock = null;
                             }
-                            selectedBlock = null;
+                            selectedDrawingBlock = null;
                         } else {
-                            selectedBlock = touchedBlock;
+                            selectedDrawingBlock = touchedDrawingBlock;
                         }
                     } else {
-                        selectedBlock = null;
+                        selectedDrawingBlock = null;
                     }
                 }
 //                break;
             }
             case MotionEvent.ACTION_CANCEL: {
-                if (touchedBlock != null) {
-                    touchedBlock.bindToGrid();
+                if (touchedDrawingBlock != null) {
+                    touchedDrawingBlock.bindToGrid();
                     invalidate();
                 }
                 isLongPressed = false;
                 isBlockMovable = false;
                 isDoubleTaped = false;
-                touchedBlock = null;
+                touchedDrawingBlock = null;
                 vibrator.cancel();
                 break;
             }
@@ -261,8 +272,8 @@ public class WorkspaceView extends View implements View.OnDragListener {
         public boolean onScale(ScaleGestureDetector detector) {
             scale *= detector.getScaleFactor();
             adjustAndSetScale();
-            selectedBlock = null;
-            touchedBlock = null;
+            selectedDrawingBlock = null;
+            touchedDrawingBlock = null;
             return true;
         }
     }
@@ -272,13 +283,13 @@ public class WorkspaceView extends View implements View.OnDragListener {
         public boolean onSingleTapConfirmed(MotionEvent event) {
             searchTouchedBlock(event);
             String message =
-                    (touchedBlock != null)
-                    ? String.format("Block: %s", touchedBlock.getClass().getSimpleName())
+                    (touchedDrawingBlock != null)
+                    ? String.format("Block: %s", touchedDrawingBlock.getClass().getSimpleName())
                     : "Workspace";
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 
             searchTouchedBlock(event);
-            if (touchedBlock != null) {
+            if (touchedDrawingBlock != null) {
             }
             return true;
         }
@@ -288,8 +299,8 @@ public class WorkspaceView extends View implements View.OnDragListener {
             isDoubleTaped = true;
             scale = (scale != PRE_SCALE) ? PRE_SCALE : PRE_SCALE * DOUBLE_TAP_SCALE_FACTOR;
             adjustAndSetScale();
-            selectedBlock = null;
-            touchedBlock = null;
+            selectedDrawingBlock = null;
+            touchedDrawingBlock = null;
             return true;
         }
 
@@ -340,29 +351,29 @@ public class WorkspaceView extends View implements View.OnDragListener {
     private void addBlock(String blockClassName, WorkspacePoint startPoint) {
         int startX = startPoint.X;
         int startY = startPoint.Y;
-        Block block = null;
-        if (blockClassName.equals(TerminalBlock.class.getSimpleName())) {
-            block = new TerminalBlock(startX, startY, 120, 80);
+        DrawingBlock drawingBlock = null;
+        if (blockClassName.equals(TerminalDrawingBlock.class.getSimpleName())) {
+            drawingBlock = new TerminalDrawingBlock(startX, startY, 120, 80);
         }
-        else if (blockClassName.equals(ProcessBlock.class.getSimpleName())) {
-            block = new ProcessBlock(startX, startY, 120, 80);
+        else if (blockClassName.equals(ProcessDrawingBlock.class.getSimpleName())) {
+            drawingBlock = new ProcessDrawingBlock(startX, startY, 120, 80);
         }
-        else if (blockClassName.equals(PredefinedProcessBlock.class.getSimpleName())) {
-            block = new PredefinedProcessBlock(startX, startY, 120, 80);
+        else if (blockClassName.equals(PredefinedProcessDrawingBlock.class.getSimpleName())) {
+            drawingBlock = new PredefinedProcessDrawingBlock(startX, startY, 120, 80);
         }
-        else if (blockClassName.equals(DecisionBlock.class.getSimpleName())) {
-            block = new DecisionBlock(startX, startY, 120, 80);
+        else if (blockClassName.equals(DecisionDrawingBlock.class.getSimpleName())) {
+            drawingBlock = new DecisionDrawingBlock(startX, startY, 120, 80);
         }
-        else if (blockClassName.equals(IOBlock.class.getSimpleName())) {
-            block = new IOBlock(startX, startY, 120, 80);
+        else if (blockClassName.equals(IODrawingBlock.class.getSimpleName())) {
+            drawingBlock = new IODrawingBlock(startX, startY, 120, 80);
         }
-        if (block != null) {
-            blocks.add(block);
+        if (drawingBlock != null) {
+            drawingBlocks.add(drawingBlock);
         }
     }
 
     private void moveBlock(float dX, float dY) {
-        touchedBlock.move(dX / scale, dY / scale);
+        touchedDrawingBlock.move(dX / scale, dY / scale);
         invalidate();
     }
 
@@ -370,17 +381,17 @@ public class WorkspaceView extends View implements View.OnDragListener {
         updateWorkspaceMatrix();
         WorkspacePoint workspacePoint = new WorkspacePoint(downEvent, workspaceMatrix);
 
-        touchedBlock = null;
-        for (Block block : blocks) {
-            if (block.contains(workspacePoint)) {
-                touchedBlock = block;
+        touchedDrawingBlock = null;
+        for (DrawingBlock drawingBlock : drawingBlocks) {
+            if (drawingBlock.contains(workspacePoint)) {
+                touchedDrawingBlock = drawingBlock;
                 break;
             }
         }
-        // Put the touched block to the foreground
-        if (touchedBlock != null) {
-            blocks.remove(touchedBlock);
-            blocks.add(touchedBlock);
+        // Put the touched drawingBlock to the foreground
+        if (touchedDrawingBlock != null) {
+            drawingBlocks.remove(touchedDrawingBlock);
+            drawingBlocks.add(touchedDrawingBlock);
         }
     }
 

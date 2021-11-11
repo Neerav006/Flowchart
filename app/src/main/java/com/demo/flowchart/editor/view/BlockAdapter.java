@@ -10,22 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.demo.flowchart.R;
-import com.demo.flowchart.editor.model.Block;
-import com.demo.flowchart.editor.model.DecisionBlock;
-import com.demo.flowchart.editor.model.IOBlock;
-import com.demo.flowchart.editor.model.PredefinedProcessBlock;
-import com.demo.flowchart.editor.model.ProcessBlock;
-import com.demo.flowchart.editor.model.TerminalBlock;
+import com.demo.flowchart.editor.model.DecisionDrawingBlock;
+import com.demo.flowchart.editor.model.DrawingBlock;
+import com.demo.flowchart.editor.model.IODrawingBlock;
+import com.demo.flowchart.editor.model.PredefinedProcessDrawingBlock;
+import com.demo.flowchart.editor.model.ProcessDrawingBlock;
+import com.demo.flowchart.editor.model.TerminalDrawingBlock;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHolder> {
 
-    List<Block> blocks;
+    List<DrawingBlock> drawingBlocks;
 
     public BlockAdapter() {
-        this.blocks = getBlockSamples();
+        this.drawingBlocks = getBlockSamples();
     }
 
     @NonNull
@@ -38,12 +38,12 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
 
     @Override
     public void onBindViewHolder(@NonNull BlockViewHolder holder, int position) {
-        holder.bind(blocks.get(position));
+        holder.bind(drawingBlocks.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return blocks.size();
+        return drawingBlocks.size();
     }
 
     protected static class BlockViewHolder extends RecyclerView.ViewHolder {
@@ -55,9 +55,9 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
             this.blockView = (BlockView) itemView;
         }
 
-        protected void bind(Block block) {
-            blockView.setBlock(block);
-            blockView.setTag(block.getClass().getSimpleName());
+        protected void bind(DrawingBlock drawingBlock) {
+            blockView.setBlock(drawingBlock);
+            blockView.setTag(drawingBlock.getClass().getSimpleName());
 
             blockView.setOnLongClickListener(view -> {
 
@@ -76,13 +76,13 @@ public class BlockAdapter extends RecyclerView.Adapter<BlockAdapter.BlockViewHol
         }
     }
 
-    private List<Block> getBlockSamples() {
-        List<Block> blocks = new ArrayList<>();
-        blocks.add(new TerminalBlock());
-        blocks.add(new ProcessBlock());
-        blocks.add(new PredefinedProcessBlock());
-        blocks.add(new DecisionBlock());
-        blocks.add(new IOBlock());
-        return blocks;
+    private List<DrawingBlock> getBlockSamples() {
+        List<DrawingBlock> drawingBlocks = new ArrayList<>();
+        drawingBlocks.add(new TerminalDrawingBlock());
+        drawingBlocks.add(new ProcessDrawingBlock());
+        drawingBlocks.add(new PredefinedProcessDrawingBlock());
+        drawingBlocks.add(new DecisionDrawingBlock());
+        drawingBlocks.add(new IODrawingBlock());
+        return drawingBlocks;
     }
 }

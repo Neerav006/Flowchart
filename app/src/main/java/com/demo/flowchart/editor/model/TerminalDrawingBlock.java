@@ -3,19 +3,20 @@ package com.demo.flowchart.editor.model;
 import android.graphics.Path;
 import android.graphics.RectF;
 
-public class ProcessBlock extends Block {
+public class TerminalDrawingBlock extends DrawingBlock {
 
-    public ProcessBlock(int startX, int startY, int width, int height) {
+    public TerminalDrawingBlock(int startX, int startY, int width, int height) {
         super(startX, startY, width, height);
     }
 
-    public ProcessBlock() {
+    public TerminalDrawingBlock() {
         super();
     }
 
     @Override
     protected void createContour() {
+        int radius = height / 2;
         RectF rectF = new RectF(startX, startY, startX + width, startY + height);
-        contour.addRect(rectF, Path.Direction.CW);
+        contour.addRoundRect(rectF, radius, radius, Path.Direction.CW);
     }
 }

@@ -1,12 +1,12 @@
 package com.demo.flowchart.editor.model;
 
-public class IOBlock extends Block {
+public class IODrawingBlock extends DrawingBlock {
 
-    public IOBlock(int startX, int startY, int width, int height) {
+    public IODrawingBlock(int startX, int startY, int width, int height) {
         super(startX, startY, width, height);
     }
 
-    public IOBlock() {
+    public IODrawingBlock() {
         super();
     }
 

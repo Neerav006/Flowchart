@@ -7,17 +7,17 @@ import android.graphics.Path;
 import com.demo.flowchart.editor.view.WorkspaceView;
 import com.demo.flowchart.editor.util.WorkspacePoint;
 
-public class Flowline {
+public class DrawingFlowline {
 
     private static final int MIN_LINE_LENGTH = WorkspaceView.GRID_STEP_SMALL * 2;
 
-    private final Block startBlock;
-    private final Block endBlock;
+    private final DrawingBlock startDrawingBlock;
+    private final DrawingBlock endDrawingBlock;
     private final Path line;
 
-    public Flowline(Block startBlock, Block endBlock) {
-        this.startBlock = startBlock;
-        this.endBlock = endBlock;
+    public DrawingFlowline(DrawingBlock startDrawingBlock, DrawingBlock endDrawingBlock) {
+        this.startDrawingBlock = startDrawingBlock;
+        this.endDrawingBlock = endDrawingBlock;
         line = new Path();
     }
 
@@ -28,21 +28,21 @@ public class Flowline {
         }
     }
 
-    protected boolean isEndBlockSame(Block endBlock) {
-        return this.endBlock == endBlock;
+    protected boolean isEndBlockSame(DrawingBlock endDrawingBlock) {
+        return this.endDrawingBlock == endDrawingBlock;
     }
 
     private void createLine() {
         line.reset();
 
-        if (startBlock.intersects(endBlock)) {
+        if (startDrawingBlock.intersects(endDrawingBlock)) {
             return;
         }
 
-        WorkspacePoint rightOut = startBlock.getRightOut();
-        WorkspacePoint bottomOut = startBlock.getBottomOut();
-        WorkspacePoint leftIn = endBlock.getLeftIn();
-        WorkspacePoint topIn = endBlock.getTopIn();
+        WorkspacePoint rightOut = startDrawingBlock.getRightOut();
+        WorkspacePoint bottomOut = startDrawingBlock.getBottomOut();
+        WorkspacePoint leftIn = endDrawingBlock.getLeftIn();
+        WorkspacePoint topIn = endDrawingBlock.getTopIn();
 
         // If the endBlock is below the startBlock
         if ((bottomOut.Y + MIN_LINE_LENGTH) <= topIn.Y) {
@@ -83,14 +83,14 @@ public class Flowline {
 
     private void bottomToTopAndLeft(WorkspacePoint bottomOut, WorkspacePoint leftIn) {
         line.moveTo(bottomOut.X, bottomOut.Y);
-        int blocksBotDY = (startBlock.startY + startBlock.height) - (endBlock.startY + endBlock.height);
+        int blocksBotDY = (startDrawingBlock.startY + startDrawingBlock.height) - (endDrawingBlock.startY + endDrawingBlock.height);
         int dY1 = Math.abs(Math.min(0, blocksBotDY)) + MIN_LINE_LENGTH;
         line.rLineTo(0, dY1);
-        int blocksLeftDX = startBlock.startX - endBlock.startX;
-        int maxHalfWidth = Math.max(startBlock.width, endBlock.width) / 2;
+        int blocksLeftDX = startDrawingBlock.startX - endDrawingBlock.startX;
+        int maxHalfWidth = Math.max(startDrawingBlock.width, endDrawingBlock.width) / 2;
         int dX = Math.abs(Math.max(0, blocksLeftDX)) + MIN_LINE_LENGTH + maxHalfWidth;
         line.rLineTo(-dX, 0);
-        int dY2 = Math.abs(Math.max(0, blocksBotDY)) + (endBlock.height / 2) + MIN_LINE_LENGTH;
+        int dY2 = Math.abs(Math.max(0, blocksBotDY)) + (endDrawingBlock.height / 2) + MIN_LINE_LENGTH;
         line.rLineTo(0, -dY2);
         line.lineTo(leftIn.X, leftIn.Y);
         line.addCircle(leftIn.X, leftIn.Y, 2f, Path.Direction.CW);

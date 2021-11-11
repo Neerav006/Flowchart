@@ -1,12 +1,12 @@
 package com.demo.flowchart.editor.model;
 
-public class PredefinedProcessBlock extends ProcessBlock {
+public class PredefinedProcessDrawingBlock extends ProcessDrawingBlock {
 
-    public PredefinedProcessBlock(int startX, int startY, int width, int height) {
+    public PredefinedProcessDrawingBlock(int startX, int startY, int width, int height) {
         super(startX, startY, width, height);
     }
 
-    public PredefinedProcessBlock() {
+    public PredefinedProcessDrawingBlock() {
         super();
     }
 

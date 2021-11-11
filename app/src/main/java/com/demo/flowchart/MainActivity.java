@@ -1,5 +1,6 @@
 package com.demo.flowchart;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
@@ -11,30 +12,29 @@ import android.util.Log;
 import android.view.DragEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.EditText;
 
 import com.demo.flowchart.auth.view.LoginFragment;
 
 import com.demo.flowchart.auth.view.RegistrationFragment;
+import com.demo.flowchart.database.FlowchartDao;
+import com.demo.flowchart.database.FlowchartEntity;
 import com.demo.flowchart.editor.view.EditorFragment;
 import com.demo.flowchart.home.HomeFragment;
+import com.demo.flowchart.json.Block;
+import com.demo.flowchart.json.JsonService;
 import com.demo.flowchart.navigation.Navigator;
 import com.demo.flowchart.profile.ProfileFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class MainActivity extends AppCompatActivity implements Navigator, View.OnDragListener {
+public class MainActivity extends AppCompatActivity implements Navigator {
 
     private CoordinatorLayout bottomNavBarContainer;
     private NavigationBarView bottomNavigationView;
     private FloatingActionButton fabCreateProject;
-
-    @Override
-    public boolean onDrag(View v, DragEvent event) {
-
-        Log.d("WorkspaceView", "DRAG");
-        return false;
-    }
+    private AlertDialog.Builder alert;
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements Navigator, View.O
             navigateTo(HomeFragment.newInstance());
         }
 
-        fabCreateProject.setOnClickListener(v -> navigateTo(EditorFragment.newInstance()));
+        fabCreateProject.setOnClickListener(v -> showCreateProjectDialog());
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             switch (item.getItemId()) {
@@ -111,5 +111,26 @@ public class MainActivity extends AppCompatActivity implements Navigator, View.O
         bottomNavigationView = null;
         fabCreateProject = null;
         bottomNavBarContainer = null;
+    }
+
+    private void showCreateProjectDialog() {
+        alert = new AlertDialog.Builder(this);
+        EditText etProjectName = new EditText(this);
+        alert.setTitle("Project creation");
+        alert.setView(etProjectName);
+
+        alert.setPositiveButton("Create", (dialog, whichButton) -> {
+            String name = etProjectName.getText().toString();
+            Block[] blocks = new Block[0];
+            String json = new JsonService().flowchartToJson(blocks);
+            FlowchartDao flowchartDao = App.getInstance().getDatabase().flowchartDao();
+            long flowchartId = flowchartDao.insert(new FlowchartEntity(name, json));
+            navigateTo(EditorFragment.newInstance(flowchartId));
+            alert = null;
+        });
+
+        alert.setNegativeButton("Cancel", (dialog, whichButton) -> alert = null);
+
+        alert.show();
     }
 }

@@ -2,7 +2,6 @@ package com.demo.flowchart.editor.model;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -10,7 +9,7 @@ import android.graphics.RectF;
 import com.demo.flowchart.editor.view.WorkspaceView;
 import com.demo.flowchart.editor.util.WorkspacePoint;
 
-public abstract class Block {
+public abstract class DrawingBlock {
 
     private static final int DEFAULT_WIDTH = 120;
     private static final int DEFAULT_HEIGHT = 80;
@@ -22,7 +21,7 @@ public abstract class Block {
     protected int height;
 
     protected String text;
-    protected Flowline flowline;
+    protected DrawingFlowline drawingFlowline;
 
     protected final Path contour;
     protected final RectF bounds;
@@ -53,15 +52,15 @@ public abstract class Block {
         boundsPaint.setStyle(Paint.Style.FILL);
     }
 
-    public Block(int startX, int startY) {
+    public DrawingBlock(int startX, int startY) {
         this(startX, startY, DEFAULT_WIDTH, DEFAULT_HEIGHT);
     }
 
-    public Block() {
+    public DrawingBlock() {
         this(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
     }
 
-    protected Block(int startX, int startY, int width, int height) {
+    protected DrawingBlock(int startX, int startY, int width, int height) {
         this.startX = startX;
         this.startY = startY;
         this.width = width;
@@ -71,12 +70,32 @@ public abstract class Block {
         bindToGrid();
     }
 
+    public long getId() {
+        return id;
+    }
+
+    public int getStartX() {
+        return startX;
+    }
+
+    public int getStartY() {
+        return startY;
+    }
+
     public int getWidth() {
         return width;
     }
 
     public int getHeight() {
         return height;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public DrawingFlowline getDrawingFlowline() {
+        return drawingFlowline;
     }
 
     public WorkspacePoint getLeftIn() {
@@ -113,8 +132,8 @@ public abstract class Block {
         canvas.drawPath(contour, fillPaint);
         canvas.drawPath(contour, contourPaint);
 
-        if (flowline != null) {
-            flowline.draw(canvas, contourPaint);
+        if (drawingFlowline != null) {
+            drawingFlowline.draw(canvas, contourPaint);
         }
     }
 
@@ -128,15 +147,15 @@ public abstract class Block {
         startY = Math.round(startY / 10f) * 10;
     }
 
-    public void setOrRemoveFlowline(Block endBlock) {
-        if (flowline == null || !flowline.isEndBlockSame(endBlock)) {
-            flowline = new Flowline(this, endBlock);
+    public void setOrRemoveFlowline(DrawingBlock endDrawingBlock) {
+        if (drawingFlowline == null || !drawingFlowline.isEndBlockSame(endDrawingBlock)) {
+            drawingFlowline = new DrawingFlowline(this, endDrawingBlock);
         } else {
-            flowline = null;
+            drawingFlowline = null;
         }
     }
 
-    public boolean intersects(Block block) {
+    public boolean intersects(DrawingBlock drawingBlock) {
         int margin = WorkspaceView.GRID_STEP_SMALL;
         return RectF.intersects(
                 new RectF(this.startX - margin,
@@ -144,10 +163,10 @@ public abstract class Block {
                         this.startX + this.width + margin,
                         this.startY + this.height + margin
                 ),
-                new RectF(block.startX - margin,
-                        block.startY - margin,
-                        block.startX + block.width + margin,
-                        block.startY + block.height + margin
+                new RectF(drawingBlock.startX - margin,
+                        drawingBlock.startY - margin,
+                        drawingBlock.startX + drawingBlock.width + margin,
+                        drawingBlock.startY + drawingBlock.height + margin
                 )
         );
     }
