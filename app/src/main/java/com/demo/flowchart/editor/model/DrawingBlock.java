@@ -14,6 +14,8 @@ public abstract class DrawingBlock {
     private static final int DEFAULT_WIDTH = 120;
     private static final int DEFAULT_HEIGHT = 80;
 
+    public static long counter = -5;
+
     protected long id;
     protected int startX;
     protected int startY;
@@ -31,8 +33,8 @@ public abstract class DrawingBlock {
     private final WorkspacePoint rightOut;
     private final WorkspacePoint bottomOut;
 
-    private final  Paint fillPaint;
-    private final  Paint boundsPaint;
+    private final Paint fillPaint;
+    private final Paint boundsPaint;
 
     {
         contour = new Path();
@@ -61,6 +63,7 @@ public abstract class DrawingBlock {
     }
 
     protected DrawingBlock(int startX, int startY, int width, int height) {
+        this.id = counter++;
         this.startX = startX;
         this.startY = startY;
         this.width = width;

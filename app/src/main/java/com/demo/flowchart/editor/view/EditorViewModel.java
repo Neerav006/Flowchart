@@ -33,6 +33,10 @@ public class EditorViewModel extends ViewModel {
         jsonService = new JsonService();
     }
 
+    public long getBlocksCount(){
+        return blocks.length;
+    }
+
     public List<DrawingBlock> getDrawingBlocks() {
         List<DrawingBlock> drawingBlocks = new ArrayList<>();
         for (Block block: blocks) {
@@ -52,7 +56,7 @@ public class EditorViewModel extends ViewModel {
     public void saveFlowchart() {
         String json = jsonService.flowchartToJson(blocks);
         flowchartEntity.setJson(json);
-        Log.d("SUKA", json);
+        Log.d("json", json);
         flowchartDao.update(flowchartEntity);
     }
 

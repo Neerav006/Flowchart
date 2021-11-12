@@ -19,6 +19,7 @@ import com.demo.flowchart.auth.view.LoginFragment;
 import com.demo.flowchart.auth.view.RegistrationFragment;
 import com.demo.flowchart.database.FlowchartDao;
 import com.demo.flowchart.database.FlowchartEntity;
+import com.demo.flowchart.editor.model.DrawingBlock;
 import com.demo.flowchart.editor.view.EditorFragment;
 import com.demo.flowchart.home.HomeFragment;
 import com.demo.flowchart.json.Block;

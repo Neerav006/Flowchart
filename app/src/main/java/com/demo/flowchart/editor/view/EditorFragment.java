@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.demo.flowchart.R;
+import com.demo.flowchart.editor.model.DrawingBlock;
 import com.demo.flowchart.navigation.Navigator;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -37,7 +38,8 @@ public class EditorFragment extends Fragment implements View.OnDragListener {
 
     private long flowchartId;
 
-    public EditorFragment() {}
+    public EditorFragment() {
+    }
 
 //    public static EditorFragment newInstance() {
 //        return new EditorFragment();
@@ -102,6 +104,8 @@ public class EditorFragment extends Fragment implements View.OnDragListener {
         return false;
     }
 
+    public static boolean flag = false;
+
     private void setUpRecycler() {
         int orientation = Configuration.ORIENTATION_PORTRAIT;
         if (getContext() != null) {
@@ -112,9 +116,15 @@ public class EditorFragment extends Fragment implements View.OnDragListener {
         } else {
             layoutManager = new LinearLayoutManager(this.getContext(), LinearLayoutManager.VERTICAL, false);
         }
+
         blocksRecycler.setLayoutManager(layoutManager);
         blockAdapter = new BlockAdapter();
         blockAdapter.setHasStableIds(true);
         blocksRecycler.setAdapter(blockAdapter);
+        if (flag) {
+            DrawingBlock.counter = viewModel.getBlocksCount() - 1;
+        }else{
+            flag = true;
+        }
     }
 }
