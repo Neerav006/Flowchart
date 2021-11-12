@@ -5,18 +5,23 @@
       <map>
         <entry key="..\:/Users/User/AndroidStudioProjects/Flowchart/app/src/main/res/layout/activity_main.xml" value="0.17831813576494426" />
         <entry key="..\:/Users/User/AndroidStudioProjects/Flowchart/app/src/main/res/layout/block_item.xml" value="0.19701086956521738" />
-        <entry key="..\:/Users/User/AndroidStudioProjects/Flowchart/app/src/main/res/layout/flowchart_item.xml" value="0.33" />
         <entry key="..\:/Users/User/AndroidStudioProjects/Flowchart/app/src/main/res/layout/fragment_editor.xml" value="0.17831813576494426" />
         <entry key="..\:/Users/User/AndroidStudioProjects/Flowchart/app/src/main/res/layout/fragment_home.xml" value="0.17831813576494426" />
         <entry key="..\:/Users/User/Flowchart/app/src/main/res/layout/activity_main.xml" value="0.17147922998986828" />
         <entry key="..\:/Users/User/Flowchart/app/src/main/res/layout/fragment_editor.xml" value="0.896875" />
+        <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable-v24/ic_baseline_save_24.xml" value="0.3828125" />
+        <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.3828125" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/condition_shape.xml" value="0.3828125" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/ic_baseline_add_24.xml" value="0.3828125" />
+        <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/ic_baseline_close_24.xml" value="0.3828125" />
+        <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/ic_baseline_delete_24.xml" value="0.3828125" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/ic_baseline_edit_24.xml" value="0.3828125" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/ic_baseline_home_24.xml" value="0.3828125" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/ic_baseline_logout_24.xml" value="0.3828125" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/ic_baseline_menu_24.xml" value="0.3828125" />
+        <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.3828125" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/ic_baseline_save_24.xml" value="0.3828125" />
+        <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/ic_launcher_background.xml" value="0.3828125" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/drawable/linear_latout_bg.xml" value="0.3828125" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/layout-land/fragment_editor.xml" value="0.23697916666666666" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/layout/activity_main.xml" value="0.2957427536231884" />
@@ -31,6 +36,8 @@
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/layout/fragment_profile_editor.xml" value="0.36666666666666664" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/layout/fragment_registration.xml" value="0.35260416666666666" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/layout/fragment_signing.xml" value="0.36666666666666664" />
+        <entry key="..\:/stud/mob/Flowchart/app/src/main/res/layout/item_block.xml" value="0.36666666666666664" />
+        <entry key="..\:/stud/mob/Flowchart/app/src/main/res/layout/item_flowchart.xml" value="0.36666666666666664" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/layout/navigation_menu.xml" value="0.36666666666666664" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.20520833333333333" />
         <entry key="..\:/stud/mob/Flowchart/app/src/main/res/menu/navigation_menu_items.xml" value="0.36666666666666664" />

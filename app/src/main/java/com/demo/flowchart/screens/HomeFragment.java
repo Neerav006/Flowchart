@@ -9,13 +9,17 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.demo.flowchart.App;
 import com.demo.flowchart.R;
 import com.demo.flowchart.adapters.FlowchartAdapter;
+import com.demo.flowchart.database.FlowchartEntity;
 import com.demo.flowchart.navigation.Navigator;
+import com.demo.flowchart.viewmodels.EditorViewModel;
+import com.demo.flowchart.viewmodels.HomeViewModel;
 
 public class HomeFragment extends Fragment implements FlowchartAdapter.FlowchartListener {
 
@@ -23,6 +27,8 @@ public class HomeFragment extends Fragment implements FlowchartAdapter.Flowchart
 
     private RecyclerView recycler;
     private FlowchartAdapter adapter;
+    //HomeViewModel homeViewModel;
+
 
     public HomeFragment() {}
 
@@ -51,6 +57,8 @@ public class HomeFragment extends Fragment implements FlowchartAdapter.Flowchart
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+       // homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+
         navigator.setUpNavBar(true);
 
         recycler = view.findViewById(R.id.rv_flowcharts);
@@ -65,4 +73,14 @@ public class HomeFragment extends Fragment implements FlowchartAdapter.Flowchart
     public void onFlowchartClick(long flowchartId) {
         navigator.navigateTo(EditorFragment.newInstance(flowchartId));
     }
+
+//    @Override
+//    public void onCloudUploadClick(FlowchartEntity flowchartEntity) {
+//
+//    }
+//
+//    @Override
+//    public void onDeleteProjectClick(FlowchartEntity flowchartEntity) {
+//        homeViewModel.deleteProject(flowchartEntity);
+//    }
 }

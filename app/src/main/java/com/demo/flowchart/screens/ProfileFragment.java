@@ -73,6 +73,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        repo = null;
         fabLogout = null;
         email = null;
         uploadsCount = null;

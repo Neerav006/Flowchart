@@ -9,4 +9,6 @@
     <string name="logout">log out</string>
     <string name="edit_profile">edit</string>
     <string name="error">error</string>
+    <string name="deleting_a_project">deleting a project</string>
+    <string name="upload_to_cloud">upload to cloud</string>
 </resources>
