@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey;
 
 @Entity
 public class FlowchartEntity {
+
     @PrimaryKey(autoGenerate = true)
     private long uid;
     private String name;

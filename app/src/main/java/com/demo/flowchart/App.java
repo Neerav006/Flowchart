@@ -3,10 +3,8 @@ package com.demo.flowchart;
 import android.app.Application;
 
 import androidx.room.Room;
-import androidx.room.RoomDatabase;
 
 import com.demo.flowchart.database.AppDatabase;
-import com.demo.flowchart.database.FlowchartDao;
 
 public class App extends Application {
 

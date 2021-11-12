@@ -8,24 +8,21 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.DragEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
-import com.demo.flowchart.auth.view.LoginFragment;
+import com.demo.flowchart.screens.LoginFragment;
 
-import com.demo.flowchart.auth.view.RegistrationFragment;
+import com.demo.flowchart.screens.RegistrationFragment;
 import com.demo.flowchart.database.FlowchartDao;
 import com.demo.flowchart.database.FlowchartEntity;
-import com.demo.flowchart.editor.model.DrawingBlock;
-import com.demo.flowchart.editor.view.EditorFragment;
-import com.demo.flowchart.home.HomeFragment;
-import com.demo.flowchart.json.Block;
-import com.demo.flowchart.json.JsonService;
+import com.demo.flowchart.screens.EditorFragment;
+import com.demo.flowchart.screens.HomeFragment;
+import com.demo.flowchart.util.JsonService;
+import com.demo.flowchart.model.Workspace;
 import com.demo.flowchart.navigation.Navigator;
-import com.demo.flowchart.profile.ProfileFragment;
+import com.demo.flowchart.screens.ProfileFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -122,8 +119,7 @@ public class MainActivity extends AppCompatActivity implements Navigator {
 
         alert.setPositiveButton("Create", (dialog, whichButton) -> {
             String name = etProjectName.getText().toString();
-            Block[] blocks = new Block[0];
-            String json = new JsonService().flowchartToJson(blocks);
+            String json = new JsonService().flowchartToJson(new Workspace());
             FlowchartDao flowchartDao = App.getInstance().getDatabase().flowchartDao();
             long flowchartId = flowchartDao.insert(new FlowchartEntity(name, json));
             navigateTo(EditorFragment.newInstance(flowchartId));
