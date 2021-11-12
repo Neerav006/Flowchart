@@ -24,7 +24,6 @@ public class EditorViewModel extends ViewModel {
     public void saveWorkspace(Workspace workspace) {
         String json = jsonService.flowchartToJson(workspace);
         flowchartEntity.setJson(json);
-        Log.d("SUKA", json);
         flowchartDao.update(flowchartEntity);
     }
 
@@ -33,6 +32,4 @@ public class EditorViewModel extends ViewModel {
         Workspace workspace = jsonService.jsonToFlowchart(flowchartEntity.getJson());
         return workspace;
     }
-
-
 }

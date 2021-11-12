@@ -105,28 +105,30 @@ public class Converters {
         );
     }
 
-    private static List<Flowline> drawingFlowlinesToFlowlines(List<DrawingFlowline> drawingFlowlines) {
-        List<Flowline> flowlines = new ArrayList<>();
-        for (DrawingFlowline drawingFlowline : drawingFlowlines) {
-            flowlines.add(new Flowline(
-                    drawingFlowline.getStartDrawingBlock().getId(),
-                    drawingFlowline.getEndDrawingBlock().getId())
-            );
+    private static Flowline[] drawingFlowlinesToFlowlines(DrawingFlowline[] drawingFlowlines) {
+        Flowline[] flowlines = new Flowline[drawingFlowlines.length];
+        for (int i = 0; i < flowlines.length; i++) {
+            if (drawingFlowlines[i] != null) {
+                flowlines[i] = new Flowline(
+                        drawingFlowlines[i].getStartDrawingBlock().getId(),
+                        drawingFlowlines[i].getEndDrawingBlock().getId()
+                );
+            }
         }
         return flowlines;
     }
 
-    private static List<DrawingFlowline> flowlinesToDrawingFlowlines(
-            List<Flowline> flowlines, Map<Long, DrawingBlock> drawingBlockMap
+    private static DrawingFlowline[] flowlinesToDrawingFlowlines(
+            Flowline[] flowlines, Map<Long, DrawingBlock> drawingBlockMap
     ) {
-        List<DrawingFlowline> drawingFlowlines = new ArrayList<>();
-        for (Flowline flowline : flowlines) {
-            drawingFlowlines.add(
-                    new DrawingFlowline(
-                            drawingBlockMap.get(flowline.getStartBlockId()),
-                            drawingBlockMap.get(flowline.getEndBlockId())
-                    )
-            );
+        DrawingFlowline[] drawingFlowlines = new DrawingFlowline[flowlines.length];
+        for (int i = 0; i < flowlines.length; i++) {
+            if (flowlines[i] != null) {
+                drawingFlowlines[i] = new DrawingFlowline(
+                        drawingBlockMap.get(flowlines[i].getStartBlockId()),
+                        drawingBlockMap.get(flowlines[i].getEndBlockId())
+                );
+            }
         }
         return drawingFlowlines;
     }

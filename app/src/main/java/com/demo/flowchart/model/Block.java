@@ -12,9 +12,9 @@ public class Block {
     private int width;
     private int height;
     private String text;
-    private List<Flowline> flowlines;
+    private Flowline[] flowlines;
 
-    public Block(long id, BlockType type, int startX, int startY, int width, int height, String text, List<Flowline> flowlines) {
+    public Block(long id, BlockType type, int startX, int startY, int width, int height, String text, Flowline[] flowlines) {
         this.id = id;
         this.type = type;
         this.startX = startX;
@@ -81,11 +81,11 @@ public class Block {
         this.text = text;
     }
 
-    public List<Flowline> getFlowlines() {
+    public Flowline[] getFlowlines() {
         return flowlines;
     }
 
-    public void setFlowlines(List<Flowline> flowlines) {
+    public void setFlowlines(Flowline[] flowlines) {
         this.flowlines = flowlines;
     }
 }

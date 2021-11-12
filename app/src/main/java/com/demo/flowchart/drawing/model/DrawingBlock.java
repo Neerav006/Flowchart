@@ -25,7 +25,7 @@ public abstract class DrawingBlock {
     protected int width;
     protected int height;
     protected String text;
-    protected List<DrawingFlowline> flowlines;
+    protected DrawingFlowline[] flowlines;
 
     protected final Path contour;
     protected final RectF bounds;
@@ -66,8 +66,7 @@ public abstract class DrawingBlock {
         this.height = height;
         this.text = text;
 
-        // TEST
-        flowlines = new ArrayList<>();
+        flowlines = new DrawingFlowline[1];
 
         adjustSize();
         bindToGrid();
@@ -110,11 +109,11 @@ public abstract class DrawingBlock {
         this.text = text;
     }
 
-    public List<DrawingFlowline> getFlowlines() {
+    public DrawingFlowline[] getFlowlines() {
         return flowlines;
     }
 
-    public void setFlowlines(List<DrawingFlowline> flowlines) {
+    public void setFlowlines(DrawingFlowline[] flowlines) {
         this.flowlines = flowlines;
     }
 
@@ -154,9 +153,11 @@ public abstract class DrawingBlock {
         // TEST
         canvas.drawText(text, startX + 5, startY + 5, contourPaint);
 
-//        for (DrawingFlowline flowline: flowlines) {
-//            flowline.draw(canvas, contourPaint);
-//        }
+        for (DrawingFlowline flowline: flowlines) {
+            if (flowline != null) {
+                flowline.draw(canvas, contourPaint);
+            }
+        }
     }
 
     public void move(float dX, float dY) {
@@ -170,13 +171,12 @@ public abstract class DrawingBlock {
     }
 
     public void setOrRemoveFlowline(DrawingBlock endDrawingBlock) {
-        for (int i = 0; i < flowlines.size(); i++) {
-            if (flowlines.get(i) == null || !flowlines.get(i).isEndBlockSame(endDrawingBlock)) {
-                flowlines.set(i, new DrawingFlowline(this, endDrawingBlock));
-            } else {
-                flowlines.set(i, null);
-            }
+        if (flowlines[0] == null || !flowlines[0].isEndBlockSame(endDrawingBlock)) {
+            flowlines[0] = new DrawingFlowline(this, endDrawingBlock);
+        } else {
+            flowlines[0] = null;
         }
+
     }
 
     public boolean intersects(@NonNull DrawingBlock drawingBlock) {
