@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Environment;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +38,7 @@ public class EditorFragment extends Fragment implements View.OnDragListener {
     private LinearLayoutManager layoutManager;
     private WorkspaceView workspaceView;
     private FloatingActionButton buttonSave;
+    private FloatingActionButton buttonViewToPdf;
 
     private long flowchartId;
 
@@ -86,6 +88,7 @@ public class EditorFragment extends Fragment implements View.OnDragListener {
         blocksRecycler = view.findViewById(R.id.rv_blocks);
         workspaceView = view.findViewById(R.id.view_workspace);
         buttonSave = view.findViewById(R.id.fab_save_project);
+        buttonViewToPdf = view.findViewById(R.id.fab_view_to_pdf);
 
         setUpRecycler();
 
@@ -93,6 +96,14 @@ public class EditorFragment extends Fragment implements View.OnDragListener {
 
         buttonSave.setOnClickListener(v -> {
             viewModel.saveWorkspace(workspaceView.getWorkspace());
+        });
+
+        buttonViewToPdf.setOnClickListener(v->{
+           if( viewModel.viewToPdf(workspaceView.getWorkspace())){
+               Toast.makeText(getContext(), "File created: " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), Toast.LENGTH_LONG).show();
+           }else{
+               Toast.makeText(getContext(), "Error", Toast.LENGTH_LONG).show();
+           }
         });
     }
 
@@ -118,5 +129,10 @@ public class EditorFragment extends Fragment implements View.OnDragListener {
         blockAdapter = new BlockAdapter();
         blockAdapter.setHasStableIds(true);
         blocksRecycler.setAdapter(blockAdapter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }

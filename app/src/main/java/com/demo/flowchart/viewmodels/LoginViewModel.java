@@ -3,7 +3,8 @@ package com.demo.flowchart.viewmodels;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.demo.flowchart.auth.AuthRepository;
+import com.demo.flowchart.App;
+import com.demo.flowchart.auth.FirebaseRepository;
 import com.demo.flowchart.auth.AuthValidation;
 import com.demo.flowchart.auth.result.AuthResult;
 import com.demo.flowchart.auth.result.EmailError;
@@ -11,8 +12,8 @@ import com.demo.flowchart.auth.result.PasswordError;
 
 public class LoginViewModel extends ViewModel {
 
-    private final AuthRepository authRepository = new AuthRepository();
-    public MutableLiveData<AuthResult> resultLiveData = authRepository.getResultLiveData();
+    private final FirebaseRepository firebaseRepository = App.getInstance().getFirebase();;
+    public MutableLiveData<AuthResult> resultLiveData = firebaseRepository.getResultLiveData();
 
     public void signIn(String email, String password) {
         email = email.trim();
@@ -31,7 +32,7 @@ public class LoginViewModel extends ViewModel {
             resultLiveData.postValue(new PasswordError("Длина пароля должна быть меньше 6 символов"));
         }
         else {
-            authRepository.login(email, password);
+            firebaseRepository.login(email, password);
         }
     }
 }

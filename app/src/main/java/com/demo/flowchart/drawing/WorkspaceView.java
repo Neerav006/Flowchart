@@ -6,7 +6,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.pdf.PdfDocument;
 import android.os.Build;
+import android.os.Environment;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.AttributeSet;
@@ -18,6 +20,10 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import com.demo.flowchart.drawing.model.DecisionDrawingBlock;
 import com.demo.flowchart.drawing.model.DrawingBlock;
 import com.demo.flowchart.drawing.model.IODrawingBlock;
@@ -27,6 +33,10 @@ import com.demo.flowchart.drawing.model.TerminalDrawingBlock;
 import com.demo.flowchart.util.Converters;
 import com.demo.flowchart.model.Workspace;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,8 +45,8 @@ public class WorkspaceView extends View implements View.OnDragListener {
     public static final int GRID_STEP_SMALL = 10;
     public static final float PRE_SCALE = 3f;
 
-    private static final int WORKSPACE_WIDTH = 1000;
-    private static final int WORKSPACE_HEIGHT = 1000;
+    public static final int WORKSPACE_WIDTH = 1000;
+    public static final int WORKSPACE_HEIGHT = 1000;
     private static final int GRID_STEP_LARGE = 40;
 
     private static final int MAX_X_OFFSET = 0;
@@ -45,7 +55,7 @@ public class WorkspaceView extends View implements View.OnDragListener {
     private static final float MAX_SCALE = 6f;
     private static final float DOUBLE_TAP_SCALE_FACTOR = 1.5f;
 
-    private static final float BOLD_LINE_WIDTH = 8f;
+    public static final float BOLD_LINE_WIDTH = 8f;
     private static final float THIN_LINE_WIDTH = 3f;
 
     private static final int HOLD_DOWN_ALLOWABLE_OFFSET = 5;
@@ -82,6 +92,8 @@ public class WorkspaceView extends View implements View.OnDragListener {
 //    private List<DrawingBlock> drawingBlocks;
     private Map<Long, DrawingBlock> drawingBlockMap; // think about it
 
+    MutableLiveData<Boolean> isTouched = new MutableLiveData<>();
+
     public WorkspaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -89,7 +101,6 @@ public class WorkspaceView extends View implements View.OnDragListener {
         vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
 
         nextBlockId = 0;
-
         scale = PRE_SCALE;
         xOffset = 0;
         yOffset = 0;
@@ -148,7 +159,6 @@ public class WorkspaceView extends View implements View.OnDragListener {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
         xOffset = Math.max(minXOffset, Math.min(MAX_X_OFFSET, xOffset));
         yOffset = Math.max(minYOffset, Math.min(MAX_Y_OFFSET, yOffset));
 
@@ -401,4 +411,5 @@ public class WorkspaceView extends View implements View.OnDragListener {
             }
         }
     }
+
 }

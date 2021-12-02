@@ -3,7 +3,8 @@ package com.demo.flowchart.viewmodels;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.demo.flowchart.auth.AuthRepository;
+import com.demo.flowchart.App;
+import com.demo.flowchart.auth.FirebaseRepository;
 import com.demo.flowchart.auth.AuthValidation;
 import com.demo.flowchart.auth.result.AuthResult;
 import com.demo.flowchart.auth.result.EmailError;
@@ -12,8 +13,8 @@ import com.demo.flowchart.auth.result.VerificationPasswordError;
 
 public class RegistrationViewModel extends ViewModel {
 
-    private final AuthRepository authRepository = new AuthRepository();
-    public MutableLiveData<AuthResult> resultLiveData = authRepository.getResultLiveData();
+    private final FirebaseRepository firebaseRepository = App.getInstance().getFirebase();
+    public MutableLiveData<AuthResult> resultLiveData = firebaseRepository.getResultLiveData();
 
     public void signUp(String email, String password, String verificationPassword) {
         email = email.trim();
@@ -37,7 +38,7 @@ public class RegistrationViewModel extends ViewModel {
             resultLiveData.postValue(new VerificationPasswordError("Пароли не совпадают"));
         }
         else {
-            authRepository.register(email, password);
+            firebaseRepository.register(email, password);
         }
     }
 }

@@ -10,7 +10,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.demo.flowchart.App;
 import com.demo.flowchart.R;
 import com.demo.flowchart.database.FlowchartEntity;
 
@@ -21,35 +20,34 @@ public class FlowchartAdapter extends RecyclerView.Adapter<FlowchartAdapter.Flow
     FlowchartListener listener;
     List<FlowchartEntity> flowcharts;
 
-
     public FlowchartAdapter(FlowchartListener listener) {
+
         this.listener = listener;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void setFlowcharts(List<FlowchartEntity> flowcharts) {
         this.flowcharts = flowcharts;
-        notifyDataSetChanged();
+        updateAdapter();
     }
 
     @NonNull
     @Override
     public FlowchartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View flowchartView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_flowchart, parent, false);
-        FlowchartViewHolder viewHolder = new FlowchartViewHolder(flowchartView);
-        flowchartView.setOnClickListener(v -> {
-            long id = flowcharts.get(viewHolder.getAdapterPosition()).getUid();
-//            FlowchartEntity flowchartEntity = flowcharts.get(viewHolder.getAdapterPosition());
-            listener.onFlowchartClick(id);
-//            listener.onCloudUploadClick(flowchartEntity);
-//            listener.onDeleteProjectClick(flowchartEntity);
-        });
-        return viewHolder;
+        return new FlowchartViewHolder(LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_flowchart, parent, false));
     }
 
     @Override
     public void onBindViewHolder(@NonNull FlowchartViewHolder holder, int position) {
+
+        holder.name.setOnClickListener(v -> listener.onFlowchartClick(flowcharts.get(position).getUid()));
+
+        holder.deleteProject.setOnClickListener(v -> {
+            listener.deleteFlowchart(flowcharts.get(position));
+            flowcharts.remove(position);
+            updateAdapter();
+        });
+
         holder.bind(flowcharts.get(position));
     }
 
@@ -58,7 +56,10 @@ public class FlowchartAdapter extends RecyclerView.Adapter<FlowchartAdapter.Flow
         return flowcharts.size();
     }
 
-
+    @SuppressLint("NotifyDataSetChanged")
+    public void updateAdapter() {
+        notifyDataSetChanged();
+    }
 
     protected static class FlowchartViewHolder extends RecyclerView.ViewHolder {
 
@@ -73,23 +74,11 @@ public class FlowchartAdapter extends RecyclerView.Adapter<FlowchartAdapter.Flow
             name = itemView.findViewById(R.id.tv_item_name);
             cloudUpload = itemView.findViewById(R.id.iv_item_cloud_upload);
             deleteProject = itemView.findViewById(R.id.iv_item_delete);
-
-           // cloudUpload.setOnClickListener(v->firebaseRepo.uploadFlowchartToFirebase());
-
-            deleteProject.setOnClickListener(v -> {
-                App.getInstance().getDatabase().flowchartDao().delete(flowchartEntity);
-            });
         }
 
         protected void bind(FlowchartEntity flowchartEntity) {
             this.flowchartEntity = flowchartEntity;
             name.setText(flowchartEntity.getName());
         }
-    }
-
-    public interface FlowchartListener {
-        void onFlowchartClick(long flowchartId);
-//        void onCloudUploadClick(FlowchartEntity flowchartEntity);
-//        void onDeleteProjectClick(FlowchartEntity flowchartEntity);
     }
 }

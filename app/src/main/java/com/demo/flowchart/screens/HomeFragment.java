@@ -16,21 +16,23 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.demo.flowchart.App;
 import com.demo.flowchart.R;
 import com.demo.flowchart.adapters.FlowchartAdapter;
+import com.demo.flowchart.adapters.FlowchartListener;
+import com.demo.flowchart.auth.FirebaseRepository;
 import com.demo.flowchart.database.FlowchartEntity;
 import com.demo.flowchart.navigation.Navigator;
-import com.demo.flowchart.viewmodels.EditorViewModel;
 import com.demo.flowchart.viewmodels.HomeViewModel;
 
-public class HomeFragment extends Fragment implements FlowchartAdapter.FlowchartListener {
+public class HomeFragment extends Fragment {
 
     private Navigator navigator;
 
     private RecyclerView recycler;
     private FlowchartAdapter adapter;
-    //HomeViewModel homeViewModel;
+    private HomeViewModel homeViewModel;
+    private FirebaseRepository firebaseRepo;
 
-
-    public HomeFragment() {}
+    public HomeFragment() {
+    }
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -57,30 +59,37 @@ public class HomeFragment extends Fragment implements FlowchartAdapter.Flowchart
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-       // homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        firebaseRepo = App.getInstance().getFirebase();
         navigator.setUpNavBar(true);
 
         recycler = view.findViewById(R.id.rv_flowcharts);
         recycler.setLayoutManager(new LinearLayoutManager(this.getContext(), RecyclerView.VERTICAL, false));
-        adapter = new FlowchartAdapter(this);
+        adapter = new FlowchartAdapter(new FlowchartListener() {
+
+            @Override
+            public void onFlowchartClick(long flowchartId) {
+                navigator.navigateTo(EditorFragment.newInstance(flowchartId));
+
+            }
+
+            @Override
+            public void deleteFlowchart(FlowchartEntity flowchartEntity) {
+                homeViewModel.deleteProject(flowchartEntity);
+                firebaseRepo.removeFlowchartFromFirebase(flowchartEntity);
+            }
+        });
         recycler.setAdapter(adapter);
         // TESt
         adapter.setFlowcharts(App.getInstance().getDatabase().flowchartDao().getAll());
     }
 
     @Override
-    public void onFlowchartClick(long flowchartId) {
-        navigator.navigateTo(EditorFragment.newInstance(flowchartId));
+    public void onDestroy() {
+        super.onDestroy();
+        recycler = null;
+        adapter = null;
+        homeViewModel = null;
+        firebaseRepo = null;
     }
-
-//    @Override
-//    public void onCloudUploadClick(FlowchartEntity flowchartEntity) {
-//
-//    }
-//
-//    @Override
-//    public void onDeleteProjectClick(FlowchartEntity flowchartEntity) {
-//        homeViewModel.deleteProject(flowchartEntity);
-//    }
 }

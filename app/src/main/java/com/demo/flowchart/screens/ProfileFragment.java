@@ -13,8 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.demo.flowchart.App;
 import com.demo.flowchart.R;
-import com.demo.flowchart.auth.AuthRepository;
+import com.demo.flowchart.auth.FirebaseRepository;
 import com.demo.flowchart.navigation.Navigator;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -28,7 +29,7 @@ public class ProfileFragment extends Fragment {
     private TextView uploadsCount;
 
     private LiveData<Boolean> isLoggedOutLiveData;
-    private AuthRepository repo;
+    private FirebaseRepository repo;
 
     public ProfileFragment() {
     }
@@ -55,14 +56,16 @@ public class ProfileFragment extends Fragment {
         fabLogout = view.findViewById(R.id.fab_logout);
         email = view.findViewById(R.id.profile_email);
         uploadsCount = view.findViewById(R.id.profile_projects_upload_count);
-        repo = new AuthRepository();
+
+        repo = App.getInstance().getFirebase();
         isLoggedOutLiveData = repo.getLoggedOutLiveData();
 
         navigator.setUpNavBar(true);
 
-        email.setText(repo.getUserEmail());
+        email.setText(repo.getUserEmail() != null ? repo.getUserEmail() : "error");
+        uploadsCount.setText(String.valueOf(repo.getCountFlowchartsFromFirebase()));
 
-        fabLogout.setOnClickListener(v-> repo.signOut());
+        fabLogout.setOnClickListener(v -> repo.signOut());
         isLoggedOutLiveData.observe(this.getViewLifecycleOwner(), b -> {
             if (b) {
                 navigator.navigateTo(LoginFragment.newInstance());

@@ -3,15 +3,18 @@ package com.demo.flowchart;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import com.demo.flowchart.auth.FirebaseRepository;
 import com.demo.flowchart.screens.LoginFragment;
 
 import com.demo.flowchart.screens.RegistrationFragment;
@@ -33,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements Navigator {
     private NavigationBarView bottomNavigationView;
     private FloatingActionButton fabCreateProject;
     private AlertDialog.Builder alert;
+    private FirebaseRepository authRepo;
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -43,6 +47,8 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setBackground(null);
 
+        authRepo = App.getInstance().getFirebase();
+        authRepo.getFlowchartsFromFirebase();
         FirebaseAuth auth = FirebaseAuth.getInstance();
 
         if (savedInstanceState == null) {
@@ -66,6 +72,9 @@ public class MainActivity extends AppCompatActivity implements Navigator {
             }
             return false;
         });
+        ActivityCompat.requestPermissions(MainActivity.this,
+                new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                1);
     }
 
     @Override
@@ -121,7 +130,10 @@ public class MainActivity extends AppCompatActivity implements Navigator {
             String name = etProjectName.getText().toString();
             String json = new JsonService().flowchartToJson(new Workspace());
             FlowchartDao flowchartDao = App.getInstance().getDatabase().flowchartDao();
-            long flowchartId = flowchartDao.insert(new FlowchartEntity(name, json));
+            FlowchartEntity flowchartEntity = new FlowchartEntity(name, json);
+            long flowchartId = flowchartDao.insert(flowchartEntity);
+            flowchartEntity.setUid(flowchartId);
+            authRepo.uploadFlowchartToFirebase(flowchartEntity);
             navigateTo(EditorFragment.newInstance(flowchartId));
             alert = null;
         });

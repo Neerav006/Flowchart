@@ -31,8 +31,6 @@ public class Converters {
         return drawingBlockMap;
     }
 
-
-
     public static List<Block> drawingBlocksToBlocks(Map<Long, DrawingBlock> drawingBlockMap) {
         List<Block> blocks = new ArrayList<>();
         for (DrawingBlock drawingBlock : drawingBlockMap.values()) {
