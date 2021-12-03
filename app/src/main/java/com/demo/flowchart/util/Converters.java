@@ -109,7 +109,8 @@ public class Converters {
             if (drawingFlowlines[i] != null) {
                 flowlines[i] = new Flowline(
                         drawingFlowlines[i].getStartDrawingBlock().getId(),
-                        drawingFlowlines[i].getEndDrawingBlock().getId()
+                        drawingFlowlines[i].getEndDrawingBlock().getId(),
+                        drawingFlowlines[i].getDecision()
                 );
             }
         }
@@ -124,7 +125,8 @@ public class Converters {
             if (flowlines[i] != null) {
                 drawingFlowlines[i] = new DrawingFlowline(
                         drawingBlockMap.get(flowlines[i].getStartBlockId()),
-                        drawingBlockMap.get(flowlines[i].getEndBlockId())
+                        drawingBlockMap.get(flowlines[i].getEndBlockId()),
+                        flowlines[i].getDecision()
                 );
             }
         }

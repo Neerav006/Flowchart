@@ -1,14 +1,15 @@
 package com.demo.flowchart.drawing;
 
+import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.pdf.PdfDocument;
 import android.os.Build;
-import android.os.Environment;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.AttributeSet;
@@ -18,11 +19,8 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.annotation.Nullable;
 
 import com.demo.flowchart.drawing.model.DecisionDrawingBlock;
 import com.demo.flowchart.drawing.model.DrawingBlock;
@@ -32,11 +30,8 @@ import com.demo.flowchart.drawing.model.ProcessDrawingBlock;
 import com.demo.flowchart.drawing.model.TerminalDrawingBlock;
 import com.demo.flowchart.util.Converters;
 import com.demo.flowchart.model.Workspace;
+import com.demo.flowchart.util.JsonService;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +42,8 @@ public class WorkspaceView extends View implements View.OnDragListener {
 
     public static final int WORKSPACE_WIDTH = 1000;
     public static final int WORKSPACE_HEIGHT = 1000;
+    public static final float BOLD_LINE_WIDTH = 8f;
+
     private static final int GRID_STEP_LARGE = 40;
 
     private static final int MAX_X_OFFSET = 0;
@@ -54,20 +51,20 @@ public class WorkspaceView extends View implements View.OnDragListener {
 
     private static final float MAX_SCALE = 6f;
     private static final float DOUBLE_TAP_SCALE_FACTOR = 1.5f;
-
-    public static final float BOLD_LINE_WIDTH = 8f;
     private static final float THIN_LINE_WIDTH = 3f;
 
     private static final int HOLD_DOWN_ALLOWABLE_OFFSET = 5;
     private static final long LONG_PRESS_TIMEOUT = ViewConfiguration.getLongPressTimeout();
+    private static final String WORKSPACE_STATE_KEY = "workspaceState";
+    private static final String SELECTED_BLOCK_ID = "selectedBlockId";
 
     private long nextBlockId;
 
     private final Context context;
     private final Vibrator vibrator;
 
-    private int minXOffset, minYOffset;
-    private int xOffset, yOffset;
+    private float minXOffset, minYOffset;
+    private float xOffset, yOffset;
 
     private float minScale;
     private float scale;
@@ -77,6 +74,7 @@ public class WorkspaceView extends View implements View.OnDragListener {
 
     private DrawingBlock touchedDrawingBlock;
     private DrawingBlock selectedDrawingBlock;
+
     private boolean isBlockMovable;
     private boolean isBlockClicked;
     private boolean isDoubleTaped;
@@ -87,20 +85,20 @@ public class WorkspaceView extends View implements View.OnDragListener {
 
     private final Matrix workspaceMatrix;
     private final Paint blockPaint;
+    private final Paint selectedBlockPaint;
     private final Paint gridPaint;
 
-//    private List<DrawingBlock> drawingBlocks;
-    private Map<Long, DrawingBlock> drawingBlockMap; // think about it
-
-    MutableLiveData<Boolean> isTouched = new MutableLiveData<>();
+    private Map<Long, DrawingBlock> drawingBlockMap;
 
     public WorkspaceView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         this.context = context;
         vibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        drawingBlockMap = new HashMap<>();
 
         nextBlockId = 0;
+
         scale = PRE_SCALE;
         xOffset = 0;
         yOffset = 0;
@@ -117,10 +115,12 @@ public class WorkspaceView extends View implements View.OnDragListener {
         gridPaint = new Paint();
         gridPaint.setColor(Color.LTGRAY);
         gridPaint.setStyle(Paint.Style.STROKE);
+        selectedBlockPaint = new Paint();
+        selectedBlockPaint.setColor(Color.RED);
+        selectedBlockPaint.setStyle(Paint.Style.STROKE);
+        selectedBlockPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
 
         setOnDragListener(this);
-//        drawingBlocks = new ArrayList<>();
-        drawingBlockMap = new HashMap<>();
     }
 
     public void setWorkspace(Workspace workspace) {
@@ -129,8 +129,6 @@ public class WorkspaceView extends View implements View.OnDragListener {
         this.scale = workspace.getScale();
         this.xOffset = workspace.getXOffset();
         this.yOffset = workspace.getYOffset();
-
-        invalidate();
     }
 
     public Workspace getWorkspace() {
@@ -143,6 +141,58 @@ public class WorkspaceView extends View implements View.OnDragListener {
         );
     }
 
+    private SelectedBlockListener selectedBlockListener = null;
+    public void setSelectedBlockListener(SelectedBlockListener listener) {
+        selectedBlockListener = listener;
+    }
+
+    public String getBlockText() {
+        return selectedDrawingBlock.getText();
+    }
+
+    public void editBlockText(String text) {
+        selectedDrawingBlock.setText(text);
+        selectedDrawingBlock.resize();
+        setSelectedDrawingBlock(null);
+        invalidate();
+    }
+
+    public void deleteBlock() {
+        drawingBlockMap.remove(selectedDrawingBlock.getId());
+        setSelectedDrawingBlock(null);
+        invalidate();
+    }
+
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        String json = new JsonService().flowchartToJson(getWorkspace());
+        bundle.putString(WORKSPACE_STATE_KEY, json);
+        if (selectedDrawingBlock != null) {
+            bundle.putLong(SELECTED_BLOCK_ID, selectedDrawingBlock.getId());
+        }
+        super.onSaveInstanceState();
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof Bundle) {
+            String json = ((Bundle) state).getString(WORKSPACE_STATE_KEY);
+            if (json != null) {
+                JsonService jsonService = new JsonService();
+                setWorkspace(jsonService.jsonToFlowchart(json));
+            }
+
+            long id = ((Bundle) state).getLong(SELECTED_BLOCK_ID, -1);
+            if (id != -1) {
+                setSelectedDrawingBlock(drawingBlockMap.get(id));
+            }
+        }
+        super.onRestoreInstanceState(super.onSaveInstanceState());
+    }
+
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
@@ -152,15 +202,13 @@ public class WorkspaceView extends View implements View.OnDragListener {
         } else {
             minScale = (float) (bottom - top) / WORKSPACE_HEIGHT;
         }
-        minXOffset = right - Math.round(WORKSPACE_WIDTH * PRE_SCALE);
-        minYOffset = bottom - Math.round(WORKSPACE_HEIGHT * PRE_SCALE);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        xOffset = Math.max(minXOffset, Math.min(MAX_X_OFFSET, xOffset));
-        yOffset = Math.max(minYOffset, Math.min(MAX_Y_OFFSET, yOffset));
+
+        adjustWorkspace();
 
         canvas.translate(xOffset, yOffset);
         canvas.scale(scale, scale);
@@ -168,8 +216,14 @@ public class WorkspaceView extends View implements View.OnDragListener {
         drawGrid(canvas);
 
         for (DrawingBlock drawingBlock : drawingBlockMap.values()) {
-            drawingBlock.draw(canvas, blockPaint);
+            if (drawingBlock == selectedDrawingBlock) {
+                drawingBlock.draw(canvas, selectedBlockPaint);
+            } else {
+                drawingBlock.draw(canvas, blockPaint);
+            }
         }
+
+        canvas.drawPoint(WORKSPACE_WIDTH / 2f, WORKSPACE_HEIGHT / 2f, blockPaint);
     }
 
     // TODO Make it prettier
@@ -212,16 +266,34 @@ public class WorkspaceView extends View implements View.OnDragListener {
                     if (touchedDrawingBlock != null) {
                         if (selectedDrawingBlock != null) {
                             if (touchedDrawingBlock != selectedDrawingBlock) {
-                                selectedDrawingBlock.setOrRemoveFlowline(touchedDrawingBlock);
-                                invalidate();
-                                touchedDrawingBlock = null;
+                                if (selectedDrawingBlock instanceof DecisionDrawingBlock) {
+                                    DecisionDrawingBlock decisionDrawingBlock = ((DecisionDrawingBlock) selectedDrawingBlock);
+                                    if (decisionDrawingBlock.hasFlowline(touchedDrawingBlock)) {
+                                        decisionDrawingBlock.removeFlowline(touchedDrawingBlock);
+                                        invalidate();
+                                    } else {
+                                        String[] itemsNames = new String[]{"true", "false"};
+                                        new AlertDialog.Builder(context)
+                                                .setTitle("Decision")
+                                                .setSingleChoiceItems(itemsNames, -1, (dialog, which) -> {
+                                                    Boolean decision = which == 0;
+                                                    decisionDrawingBlock.setFlowline(touchedDrawingBlock, decision);
+                                                    invalidate();
+                                                    dialog.dismiss();
+                                                })
+                                                .show();
+                                    }
+                                } else {
+                                    selectedDrawingBlock.setOrRemoveFlowline(touchedDrawingBlock);
+                                    invalidate();
+                                }
                             }
-                            selectedDrawingBlock = null;
+                            setSelectedDrawingBlock(null);
                         } else {
-                            selectedDrawingBlock = touchedDrawingBlock;
+                            setSelectedDrawingBlock(touchedDrawingBlock);
                         }
                     } else {
-                        selectedDrawingBlock = null;
+                        setSelectedDrawingBlock(null);
                     }
                 }
 //                break;
@@ -261,59 +333,6 @@ public class WorkspaceView extends View implements View.OnDragListener {
         return true;
     }
 
-    private class WorkspaceScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-        @Override
-        public boolean onScale(ScaleGestureDetector detector) {
-            scale *= detector.getScaleFactor();
-            adjustAndSetScale();
-            selectedDrawingBlock = null;
-            touchedDrawingBlock = null;
-            return true;
-        }
-    }
-
-    private class WorkspaceGestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onSingleTapConfirmed(MotionEvent event) {
-            searchTouchedBlock(event);
-            String message =
-                    (touchedDrawingBlock != null)
-                            ? String.format("Block: %s", touchedDrawingBlock.getClass().getSimpleName())
-                            : "Workspace";
-            Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
-
-            searchTouchedBlock(event);
-            if (touchedDrawingBlock != null) {
-            }
-            return true;
-        }
-
-        @Override
-        public boolean onDoubleTap(MotionEvent event) {
-            isDoubleTaped = true;
-            scale = (scale != PRE_SCALE) ? PRE_SCALE : PRE_SCALE * DOUBLE_TAP_SCALE_FACTOR;
-            adjustAndSetScale();
-            selectedDrawingBlock = null;
-            touchedDrawingBlock = null;
-            return true;
-        }
-
-        @Override
-        public boolean onScroll(MotionEvent downEvent, MotionEvent scrollEvent, float distanceX, float distanceY) {
-            if (isBlockMovable) {
-                moveBlock(distanceX, distanceY);
-            } else {
-                moveWorkspace(distanceX, distanceY);
-            }
-            return true;
-        }
-
-        @Override
-        public boolean onFling(MotionEvent downEvent, MotionEvent flingEvent, float velocityX, float velocityY) {
-            return false;
-        }
-    }
-
     private void drawGrid(Canvas canvas) {
         for (int x = 0; x <= WORKSPACE_WIDTH; x += GRID_STEP_SMALL) {
             for (int y = 0; y <= WORKSPACE_HEIGHT; y += GRID_STEP_SMALL) {
@@ -328,18 +347,18 @@ public class WorkspaceView extends View implements View.OnDragListener {
         }
     }
 
-    private void adjustAndSetScale() {
+    private void adjustWorkspace() {
         scale = Math.max(minScale, Math.min(MAX_SCALE, scale));
+        blockPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
         minXOffset = getWidth() - Math.round(WORKSPACE_WIDTH * scale);
         minYOffset = getHeight() - Math.round(WORKSPACE_HEIGHT * scale);
-        blockPaint.setStrokeWidth(BOLD_LINE_WIDTH / scale);
-        invalidate();
+        xOffset = Math.max(minXOffset, Math.min(MAX_X_OFFSET, xOffset));
+        yOffset = Math.max(minYOffset, Math.min(MAX_Y_OFFSET, yOffset));
     }
 
     private void moveWorkspace(float dX, float dY) {
         xOffset -= Math.round(dX);
         yOffset -= Math.round(dY);
-        invalidate();
     }
 
     private void addBlock(String blockClassName, WorkspacePoint startPoint) {
@@ -358,7 +377,6 @@ public class WorkspaceView extends View implements View.OnDragListener {
             drawingBlock = new IODrawingBlock(nextBlockId, startX, startY);
         }
         if (drawingBlock != null) {
-//            drawingBlocks.add(drawingBlock);
             drawingBlockMap.put(nextBlockId, drawingBlock);
             nextBlockId++;
         }
@@ -366,26 +384,13 @@ public class WorkspaceView extends View implements View.OnDragListener {
 
     private void moveBlock(float dX, float dY) {
         touchedDrawingBlock.move(dX / scale, dY / scale);
-        invalidate();
     }
 
     private void searchTouchedBlock(MotionEvent downEvent) {
         updateWorkspaceMatrix();
         WorkspacePoint workspacePoint = new WorkspacePoint(downEvent, workspaceMatrix);
 
-//        touchedDrawingBlock = null;
-//        for (int i = drawingBlocks.size() - 1; i >= 0; i--) {
-//            if (drawingBlocks.get(i).contains(workspacePoint)) {
-//                touchedDrawingBlock = drawingBlocks.get(i);
-//                break;
-//            }
-//        }
-//        // Put the touched drawingBlock to the foreground
-//        if (touchedDrawingBlock != null) {
-//            drawingBlocks.remove(touchedDrawingBlock);
-//            drawingBlocks.add(touchedDrawingBlock);
-//        }
-        for (DrawingBlock drawingBlock: drawingBlockMap.values()) {
+        for (DrawingBlock drawingBlock : drawingBlockMap.values()) {
             if (drawingBlock.contains(workspacePoint)) {
                 touchedDrawingBlock = drawingBlock;
                 break;
@@ -412,4 +417,82 @@ public class WorkspaceView extends View implements View.OnDragListener {
         }
     }
 
+    private void setSelectedDrawingBlock(DrawingBlock selectedDrawingBlock) {
+        this.selectedDrawingBlock = selectedDrawingBlock;
+        selectedBlockListener.onBlockSelected(selectedDrawingBlock != null);
+    }
+
+    public interface SelectedBlockListener {
+        void onBlockSelected(Boolean isSelected);
+    }
+
+    private class WorkspaceScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+        @Override
+        public boolean onScale(ScaleGestureDetector detector) {
+            float oldScale = scale;
+            scale *= detector.getScaleFactor();
+
+            if (scale < MAX_SCALE) {
+                float scaleChange = scale - oldScale;
+                xOffset += (detector.getFocusX() * scaleChange);
+                yOffset += (detector.getFocusY() * scaleChange);
+            }
+
+            invalidate();
+            setSelectedDrawingBlock(null);
+            touchedDrawingBlock = null;
+            return true;
+        }
+    }
+
+    private class WorkspaceGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent event) {
+            searchTouchedBlock(event);
+            String message =
+                    (touchedDrawingBlock != null)
+                            ? String.format("Block: %s", touchedDrawingBlock.getClass().getSimpleName())
+                            : "Workspace";
+
+            searchTouchedBlock(event);
+            if (touchedDrawingBlock != null) {
+            }
+            return true;
+        }
+
+        @Override
+        public boolean onDoubleTap(MotionEvent event) {
+            isDoubleTaped = true;
+            float oldScale = scale;
+            scale = (scale != PRE_SCALE) ? PRE_SCALE : PRE_SCALE * DOUBLE_TAP_SCALE_FACTOR;
+
+            float scaleChange = scale - oldScale;
+            xOffset -= (event.getX() * scaleChange);
+            yOffset -= (event.getY() * scaleChange);
+
+            invalidate();
+            setSelectedDrawingBlock(null);
+            touchedDrawingBlock = null;
+            return true;
+        }
+
+        @Override
+        public boolean onScroll(MotionEvent downEvent, MotionEvent scrollEvent, float distanceX, float distanceY) {
+            if (!scaleGestureDetector.isInProgress()) {
+                if (isBlockMovable) {
+                    moveBlock(distanceX, distanceY);
+                } else {
+                    moveWorkspace(distanceX, distanceY);
+                }
+                invalidate();
+                return true;
+            }
+            else return false;
+        }
+
+        @Override
+        public boolean onFling(MotionEvent downEvent, MotionEvent flingEvent, float velocityX, float velocityY) {
+            return false;
+        }
+    }
 }

@@ -2,6 +2,8 @@ package com.demo.flowchart.drawing.model;
 
 public class IODrawingBlock extends DrawingBlock {
 
+    private static final int SHIFT = 20;
+
     public IODrawingBlock(
             long id,
             int startX,
@@ -29,5 +31,10 @@ public class IODrawingBlock extends DrawingBlock {
         contour.rLineTo(-shift, height);
         contour.rLineTo(shift - width, 0);
         contour.rLineTo(shift, -height);
+    }
+
+    @Override
+    protected int textHorizontalPadding() {
+        return super.textHorizontalPadding() + SHIFT / 2;
     }
 }

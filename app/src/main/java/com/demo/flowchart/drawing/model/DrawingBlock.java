@@ -5,14 +5,15 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.graphics.Typeface;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 
 import androidx.annotation.NonNull;
 
 import com.demo.flowchart.drawing.WorkspaceView;
 import com.demo.flowchart.drawing.WorkspacePoint;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class DrawingBlock {
 
@@ -36,6 +37,8 @@ public abstract class DrawingBlock {
     private final WorkspacePoint bottomOut;
 
     private final Paint fillPaint;
+    protected final TextPaint textPaint;
+    protected final Paint hintPaint;
 
     {
         contour = new Path();
@@ -49,6 +52,20 @@ public abstract class DrawingBlock {
         fillPaint = new Paint();
         fillPaint.setColor(Color.WHITE);
         fillPaint.setStyle(Paint.Style.FILL);
+
+        textPaint = new TextPaint();
+        textPaint.setColor(Color.BLACK);
+        textPaint.setStyle(Paint.Style.FILL);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        textPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.NORMAL));
+        textPaint.setTextSize(18);
+
+        hintPaint = new Paint();
+        hintPaint.setColor(Color.BLACK);
+        hintPaint.setStyle(Paint.Style.FILL);
+        hintPaint.setTextAlign(Paint.Align.LEFT);
+        hintPaint.setTypeface(Typeface.create(Typeface.MONOSPACE, Typeface.BOLD_ITALIC));
+        hintPaint.setTextSize(14);
     }
 
     protected DrawingBlock(
@@ -66,7 +83,7 @@ public abstract class DrawingBlock {
         this.height = height;
         this.text = text;
 
-        flowlines = new DrawingFlowline[1];
+        this.flowlines = new DrawingFlowline[1];
 
         adjustSize();
         bindToGrid();
@@ -79,6 +96,8 @@ public abstract class DrawingBlock {
     // Sample block constructor
     public DrawingBlock() {
         this(0, 0, 0);
+        this.text = null;
+        this.flowlines = null;
     }
 
     public long getId() {
@@ -146,18 +165,32 @@ public abstract class DrawingBlock {
     }
 
     public void draw(@NonNull Canvas canvas, Paint contourPaint) {
-        createShape();
+        drawBlock(canvas, contourPaint);
+        drawText(canvas);
+        drawFlowlines(canvas, contourPaint);
+    }
 
-        canvas.drawPath(contour, fillPaint);
-        canvas.drawPath(contour, contourPaint);
-        // TEST
-        canvas.drawText(text, startX + 5, startY + 5, contourPaint);
+    public void resize() {
+        int desiredHeight = DEFAULT_HEIGHT;
+        int desiredWidth = DEFAULT_WIDTH;
 
-        for (DrawingFlowline flowline: flowlines) {
-            if (flowline != null) {
-                flowline.draw(canvas, contourPaint);
+        while (true) {
+            StaticLayout textLayout = new StaticLayout(
+                    text, textPaint, (desiredWidth - textHorizontalPadding() * 2), Layout.Alignment.ALIGN_NORMAL,
+                    1.0f, 0.0f, false
+            );
+            int textHeight = textLayout.getHeight();
+            if (textHeight > desiredHeight - textVerticalPadding() * 2) {
+                desiredHeight += 20;
+                desiredWidth = desiredHeight * 3 / 2;
+            } else {
+                break;
             }
         }
+
+        height = desiredHeight;
+        adjustSize();
+        bindToGrid();
     }
 
     public void move(float dX, float dY) {
@@ -176,7 +209,6 @@ public abstract class DrawingBlock {
         } else {
             flowlines[0] = null;
         }
-
     }
 
     public boolean intersects(@NonNull DrawingBlock drawingBlock) {
@@ -197,7 +229,41 @@ public abstract class DrawingBlock {
 
     protected abstract void createContour();
 
-    private void adjustSize() {
+    private void drawBlock(Canvas canvas, Paint contourPaint) {
+        createShape();
+        canvas.drawPath(contour, fillPaint);
+        canvas.drawPath(contour, contourPaint);
+    }
+
+    private void drawText(Canvas canvas) {
+        if (text == null) return;
+        if (text.isEmpty()) return;
+
+        StaticLayout textLayout =  new StaticLayout(
+                text, textPaint, (textHorizontalSize() - textHorizontalPadding() * 2), Layout.Alignment.ALIGN_NORMAL,
+                1.0f, 0.0f, false
+        );
+
+        int textHeight = textLayout.getHeight();
+        float textStartX = bounds.centerX();
+        float textStartY = bounds.centerY() - textHeight / 2f;
+
+        canvas.save();
+        canvas.translate(textStartX, textStartY);
+        textLayout.draw(canvas);
+        canvas.restore();
+    }
+
+    private void drawFlowlines(Canvas canvas, Paint contourPaint) {
+        if (flowlines == null) return;
+        for (DrawingFlowline flowline : flowlines) {
+            if (flowline != null) {
+                flowline.draw(canvas, contourPaint, hintPaint);
+            }
+        }
+    }
+
+    protected void adjustSize() {
         height = Math.round(height / 10f) * 10;
         width = height * 3 / 2;
     }
@@ -207,5 +273,17 @@ public abstract class DrawingBlock {
         createContour();
         contour.close();
         contour.computeBounds(bounds, false);
+    }
+
+    protected int textHorizontalPadding() {
+        return 10;
+    }
+
+    protected int textVerticalPadding() {
+        return 10;
+    }
+
+    protected int textHorizontalSize() {
+        return width;
     }
 }

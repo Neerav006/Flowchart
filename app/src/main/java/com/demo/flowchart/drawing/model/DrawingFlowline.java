@@ -13,12 +13,18 @@ public class DrawingFlowline {
 
     private final DrawingBlock startDrawingBlock;
     private final DrawingBlock endDrawingBlock;
+    private final Boolean decision;
     private final Path line;
 
-    public DrawingFlowline(DrawingBlock startDrawingBlock, DrawingBlock endDrawingBlock) {
+    public DrawingFlowline(DrawingBlock startDrawingBlock, DrawingBlock endDrawingBlock, Boolean decision) {
         this.startDrawingBlock = startDrawingBlock;
         this.endDrawingBlock = endDrawingBlock;
+        this.decision = decision;
         line = new Path();
+    }
+
+    public DrawingFlowline(DrawingBlock startDrawingBlock, DrawingBlock endDrawingBlock) {
+        this(startDrawingBlock, endDrawingBlock, null);
     }
 
     public DrawingBlock getStartDrawingBlock() {
@@ -29,10 +35,18 @@ public class DrawingFlowline {
         return endDrawingBlock;
     }
 
-    public void draw(Canvas canvas, Paint paint) {
+    public Boolean getDecision() {
+        return decision;
+    }
+
+    public void draw(Canvas canvas, Paint linePaint, Paint textPaint) {
         createLine();
         if (!line.isEmpty()) {
-            canvas.drawPath(line, paint);
+            canvas.drawPath(line, linePaint);
+            if (decision != null) {
+                String hint = decision ? "True" : "False";
+                canvas.drawTextOnPath(hint, line, 5, -5, textPaint);
+            }
         }
     }
 
@@ -52,19 +66,45 @@ public class DrawingFlowline {
         WorkspacePoint leftIn = endDrawingBlock.getLeftIn();
         WorkspacePoint topIn = endDrawingBlock.getTopIn();
 
-        // If the endBlock is below the startBlock
-        if ((bottomOut.Y + MIN_LINE_LENGTH) <= topIn.Y) {
-            bottomToTop(bottomOut, topIn);
-        }
-        // If above
-        else {
-            // If the endBlock is to the right of the startBlock
-            if ((rightOut.X + MIN_LINE_LENGTH) <= leftIn.X) {
-                rightToLeft(rightOut, leftIn);
+        // Common flowlines
+        if (decision == null) {
+            // If the endBlock is below the startBlock
+            if ((bottomOut.Y + MIN_LINE_LENGTH) <= topIn.Y) {
+                bottomToTop(bottomOut, topIn);
             }
-            // If is to the left
-            else  {
-                bottomToTopAndLeft(bottomOut, leftIn);
+            // If above
+            else {
+                // If the endBlock is to the right of the startBlock
+                if ((rightOut.X + MIN_LINE_LENGTH) <= leftIn.X) {
+                    rightToLeft(rightOut, leftIn);
+                }
+                // If is to the left
+                else  {
+                    bottomToTopAndLeft(bottomOut, leftIn);
+                }
+            }
+        }
+        // Decision flowlines
+        else {
+            if (decision) {
+                // If the endBlock is below the startBlock
+                if ((bottomOut.Y + MIN_LINE_LENGTH) <= topIn.Y) {
+                    bottomToTop(bottomOut, topIn);
+                }
+                // If above
+                else {
+                    bottomToTopAndLeft(bottomOut, leftIn);
+                }
+            }
+            else {
+                // If the endBlock is below the startBlock
+                if ((bottomOut.Y + MIN_LINE_LENGTH) <= topIn.Y) {
+                    rightToTopDecision(rightOut, topIn);
+                }
+                // If above
+                else {
+                    rightToLeftDecision(rightOut, leftIn);
+                }
             }
         }
     }
@@ -76,7 +116,6 @@ public class DrawingFlowline {
         line.rLineTo(0, halfLengthY);
         line.rLineTo(lengthX, 0);
         line.lineTo(topIn.X, topIn.Y);
-        line.addCircle(topIn.X, topIn.Y, 2f, Path.Direction.CW);
     }
 
     private void rightToLeft(WorkspacePoint rightOut, WorkspacePoint leftIn) {
@@ -86,7 +125,6 @@ public class DrawingFlowline {
         int lengthY = leftIn.Y - rightOut.Y;
         line.rLineTo(0, lengthY);
         line.lineTo(leftIn.X, leftIn.Y);
-        line.addCircle(leftIn.X, leftIn.Y, 2f, Path.Direction.CW);
     }
 
     private void bottomToTopAndLeft(WorkspacePoint bottomOut, WorkspacePoint leftIn) {
@@ -101,6 +139,26 @@ public class DrawingFlowline {
         int dY2 = Math.abs(Math.max(0, blocksBotDY)) + (endDrawingBlock.height / 2) + MIN_LINE_LENGTH;
         line.rLineTo(0, -dY2);
         line.lineTo(leftIn.X, leftIn.Y);
-        line.addCircle(leftIn.X, leftIn.Y, 2f, Path.Direction.CW);
+    }
+
+    private void rightToTopDecision(WorkspacePoint rightOut, WorkspacePoint topIn) {
+        // TODO Simple implementation
+        if (rightOut.X + MIN_LINE_LENGTH > topIn.X) return;
+
+        line.moveTo(rightOut.X, rightOut.Y);
+        line.lineTo(topIn.X, rightOut.Y);
+        line.lineTo(topIn.X, topIn.Y);
+    }
+
+    private void rightToLeftDecision(WorkspacePoint rightOut, WorkspacePoint leftIn) {
+        // TODO Simple implementation
+        if (rightOut.X + MIN_LINE_LENGTH > leftIn.X) return;
+
+        line.moveTo(rightOut.X, rightOut.Y);
+        int halfLengthX = (leftIn.X - rightOut.X) / 2;
+        line.rLineTo(halfLengthX, 0);
+        int lengthY = leftIn.Y - rightOut.Y;
+        line.rLineTo(0, lengthY);
+        line.lineTo(leftIn.X, leftIn.Y);
     }
 }

@@ -10,10 +10,10 @@ public class Workspace {
     private List<Block> blocks;
     private Long nextBlockId;
     private float scale;
-    private int xOffset;
-    private int yOffset;
+    private float xOffset;
+    private float yOffset;
 
-    public Workspace(List<Block> blocks, Long nextBlockId, float scale, int xOffset, int yOffset) {
+    public Workspace(List<Block> blocks, Long nextBlockId, float scale, float xOffset, float yOffset) {
         this.blocks = blocks;
         this.nextBlockId = nextBlockId;
         this.scale = scale;
@@ -49,19 +49,19 @@ public class Workspace {
         this.scale = scale;
     }
 
-    public int getXOffset() {
+    public float getXOffset() {
         return xOffset;
     }
 
-    public void setxOffset(int xOffset) {
+    public void setXOffset(float xOffset) {
         this.xOffset = xOffset;
     }
 
-    public int getYOffset() {
+    public float getYOffset() {
         return yOffset;
     }
 
-    public void setyOffset(int yOffset) {
+    public void setYOffset(float yOffset) {
         this.yOffset = yOffset;
     }
 }

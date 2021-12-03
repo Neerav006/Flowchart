@@ -2,6 +2,8 @@ package com.demo.flowchart.drawing.model;
 
 public class PredefinedProcessDrawingBlock extends ProcessDrawingBlock {
 
+    private static final int EDGE_WIDTH = 15;
+
     public PredefinedProcessDrawingBlock(
             long id,
             int startX,
@@ -24,10 +26,14 @@ public class PredefinedProcessDrawingBlock extends ProcessDrawingBlock {
     @Override
     protected void createContour() {
         super.createContour();
-        int edgeWidth = 15;
-        contour.moveTo(startX + edgeWidth, startY);
+        contour.moveTo(startX + EDGE_WIDTH, startY);
         contour.rLineTo(0, height);
-        contour.moveTo(startX + width - edgeWidth, startY);
+        contour.moveTo(startX + width - EDGE_WIDTH, startY);
         contour.rLineTo(0, height);
+    }
+
+    @Override
+    protected int textHorizontalPadding() {
+        return super.textHorizontalPadding() + EDGE_WIDTH;
     }
 }
