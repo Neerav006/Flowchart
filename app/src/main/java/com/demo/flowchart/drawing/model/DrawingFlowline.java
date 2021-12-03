@@ -10,6 +10,7 @@ import com.demo.flowchart.drawing.WorkspacePoint;
 public class DrawingFlowline {
 
     private static final int MIN_LINE_LENGTH = WorkspaceView.GRID_STEP_SMALL * 2;
+    private static final int ARROW_PROJECTION = 10;
 
     private final DrawingBlock startDrawingBlock;
     private final DrawingBlock endDrawingBlock;
@@ -116,6 +117,7 @@ public class DrawingFlowline {
         line.rLineTo(0, halfLengthY);
         line.rLineTo(lengthX, 0);
         line.lineTo(topIn.X, topIn.Y);
+        addTopArrow(topIn);
     }
 
     private void rightToLeft(WorkspacePoint rightOut, WorkspacePoint leftIn) {
@@ -125,6 +127,7 @@ public class DrawingFlowline {
         int lengthY = leftIn.Y - rightOut.Y;
         line.rLineTo(0, lengthY);
         line.lineTo(leftIn.X, leftIn.Y);
+        addLeftArrow(leftIn);
     }
 
     private void bottomToTopAndLeft(WorkspacePoint bottomOut, WorkspacePoint leftIn) {
@@ -139,6 +142,7 @@ public class DrawingFlowline {
         int dY2 = Math.abs(Math.max(0, blocksBotDY)) + (endDrawingBlock.height / 2) + MIN_LINE_LENGTH;
         line.rLineTo(0, -dY2);
         line.lineTo(leftIn.X, leftIn.Y);
+        addLeftArrow(leftIn);
     }
 
     private void rightToTopDecision(WorkspacePoint rightOut, WorkspacePoint topIn) {
@@ -148,6 +152,7 @@ public class DrawingFlowline {
         line.moveTo(rightOut.X, rightOut.Y);
         line.lineTo(topIn.X, rightOut.Y);
         line.lineTo(topIn.X, topIn.Y);
+        addTopArrow(topIn);
     }
 
     private void rightToLeftDecision(WorkspacePoint rightOut, WorkspacePoint leftIn) {
@@ -160,5 +165,20 @@ public class DrawingFlowline {
         int lengthY = leftIn.Y - rightOut.Y;
         line.rLineTo(0, lengthY);
         line.lineTo(leftIn.X, leftIn.Y);
+        addLeftArrow(leftIn);
+    }
+
+    private void addLeftArrow(WorkspacePoint leftIn) {
+        line.moveTo(leftIn.X - ARROW_PROJECTION, leftIn.Y + ARROW_PROJECTION);
+        line.lineTo(leftIn.X, leftIn.Y);
+        line.moveTo(leftIn.X - ARROW_PROJECTION, leftIn.Y - ARROW_PROJECTION);
+        line.lineTo(leftIn.X, leftIn.Y);
+    }
+
+    private void addTopArrow(WorkspacePoint topIn) {
+        line.moveTo(topIn.X + ARROW_PROJECTION, topIn.Y - ARROW_PROJECTION);
+        line.lineTo(topIn.X, topIn.Y);
+        line.moveTo(topIn.X - ARROW_PROJECTION, topIn.Y - ARROW_PROJECTION);
+        line.lineTo(topIn.X, topIn.Y);
     }
 }

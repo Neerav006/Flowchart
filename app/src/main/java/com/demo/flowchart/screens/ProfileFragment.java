@@ -28,7 +28,6 @@ public class ProfileFragment extends Fragment {
     private TextView email;
     private TextView uploadsCount;
 
-    private LiveData<Boolean> isLoggedOutLiveData;
     private FirebaseRepository repo;
 
     public ProfileFragment() {
@@ -58,12 +57,11 @@ public class ProfileFragment extends Fragment {
         uploadsCount = view.findViewById(R.id.profile_projects_upload_count);
 
         repo = App.getInstance().getFirebase();
-        isLoggedOutLiveData = repo.getLoggedOutLiveData();
+        LiveData<Boolean> isLoggedOutLiveData = repo.getLoggedOutLiveData();
 
         navigator.setUpNavBar(true);
 
         email.setText(repo.getUserEmail() != null ? repo.getUserEmail() : "error");
-        uploadsCount.setText(String.valueOf(repo.getCountFlowchartsFromFirebase()));
 
         fabLogout.setOnClickListener(v -> repo.signOut());
         isLoggedOutLiveData.observe(this.getViewLifecycleOwner(), b -> {

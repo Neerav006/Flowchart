@@ -13,6 +13,7 @@ import android.os.Parcelable;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.view.DragEvent;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -24,6 +25,7 @@ import androidx.annotation.Nullable;
 
 import com.demo.flowchart.drawing.model.DecisionDrawingBlock;
 import com.demo.flowchart.drawing.model.DrawingBlock;
+import com.demo.flowchart.drawing.model.DrawingFlowline;
 import com.demo.flowchart.drawing.model.IODrawingBlock;
 import com.demo.flowchart.drawing.model.PredefinedProcessDrawingBlock;
 import com.demo.flowchart.drawing.model.ProcessDrawingBlock;
@@ -32,7 +34,9 @@ import com.demo.flowchart.util.Converters;
 import com.demo.flowchart.model.Workspace;
 import com.demo.flowchart.util.JsonService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class WorkspaceView extends View implements View.OnDragListener {
@@ -41,7 +45,7 @@ public class WorkspaceView extends View implements View.OnDragListener {
     public static final float PRE_SCALE = 3f;
 
     public static final int WORKSPACE_WIDTH = 1000;
-    public static final int WORKSPACE_HEIGHT = 1000;
+    public static final int WORKSPACE_HEIGHT = 1400;
     public static final float BOLD_LINE_WIDTH = 8f;
 
     private static final int GRID_STEP_LARGE = 40;
@@ -159,6 +163,15 @@ public class WorkspaceView extends View implements View.OnDragListener {
 
     public void deleteBlock() {
         drawingBlockMap.remove(selectedDrawingBlock.getId());
+        for (DrawingBlock block : drawingBlockMap.values()) {
+            DrawingFlowline[] flowlines = block.getFlowlines();
+            for (int i = 0; i < flowlines.length; i++) {
+                if (flowlines[i] == null) continue;
+                if (flowlines[i].getEndDrawingBlock() == selectedDrawingBlock) {
+                    flowlines[i] = null;
+                }
+            }
+        }
         setSelectedDrawingBlock(null);
         invalidate();
     }
@@ -223,7 +236,8 @@ public class WorkspaceView extends View implements View.OnDragListener {
             }
         }
 
-        canvas.drawPoint(WORKSPACE_WIDTH / 2f, WORKSPACE_HEIGHT / 2f, blockPaint);
+        // Center of the workspace
+//        canvas.drawPoint(WORKSPACE_WIDTH / 2f, WORKSPACE_HEIGHT / 2f, blockPaint);
     }
 
     // TODO Make it prettier

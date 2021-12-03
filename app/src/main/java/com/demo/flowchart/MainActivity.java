@@ -6,6 +6,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.LiveData;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -30,13 +31,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements Navigator {
 
     private CoordinatorLayout bottomNavBarContainer;
     private NavigationBarView bottomNavigationView;
     private FloatingActionButton fabCreateProject;
     private AlertDialog.Builder alert;
-    private FirebaseRepository authRepo;
+    private FirebaseRepository firebaseRepo;
 
     @SuppressLint("NonConstantResourceId")
     @Override
@@ -47,12 +50,13 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setBackground(null);
 
-        authRepo = App.getInstance().getFirebase();
-        authRepo.getFlowchartsFromFirebase();
+        firebaseRepo = App.getInstance().getFirebase();
+        firebaseRepo.getFlowchartsFromFirebase();
         FirebaseAuth auth = FirebaseAuth.getInstance();
 
         if (savedInstanceState == null) {
             navigateTo(HomeFragment.newInstance());
+            syncFlowcharts();
         }
 
         fabCreateProject.setOnClickListener(v -> showCreateProjectDialog());
@@ -120,6 +124,35 @@ public class MainActivity extends AppCompatActivity implements Navigator {
         bottomNavBarContainer = null;
     }
 
+    private void syncFlowcharts() {
+        FlowchartDao flowchartDao = App.getInstance().getDatabase().flowchartDao();
+        List<FlowchartEntity> dbEntities = flowchartDao.getAll();
+
+        firebaseRepo.getFlowchartsFromFirebase();
+        LiveData<List<FlowchartEntity>> fbFlowchartsLiveData = firebaseRepo.getFlowchartsLiveData();
+        fbFlowchartsLiveData.observe(this, fbEntities -> {
+
+            for (int i = 0; i < fbEntities.size(); i++) {
+                for (int j = 0; j < dbEntities.size(); j++) {
+                    if (dbEntities.get(j).getName().equals(fbEntities.get(i).getName())) {
+                        break;
+                    }
+                    if (j == dbEntities.size() - 1) {
+                        flowchartDao.insert(fbEntities.get(i));
+                    }
+                }
+            }
+
+            List<FlowchartEntity> dbEntitiesNEW = flowchartDao.getAll();
+
+            for(FlowchartEntity flowchartEntity: dbEntitiesNEW){
+                firebaseRepo.uploadFlowchartToFirebase(flowchartEntity);
+            }
+
+//            fbFlowchartsLiveData.removeObservers(this);
+        });
+    }
+
     private void showCreateProjectDialog() {
         alert = new AlertDialog.Builder(this);
         EditText etProjectName = new EditText(this);
@@ -133,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements Navigator {
             FlowchartEntity flowchartEntity = new FlowchartEntity(name, json);
             long flowchartId = flowchartDao.insert(flowchartEntity);
             flowchartEntity.setUid(flowchartId);
-            authRepo.uploadFlowchartToFirebase(flowchartEntity);
+            firebaseRepo.uploadFlowchartToFirebase(flowchartEntity);
             navigateTo(EditorFragment.newInstance(flowchartId));
             alert = null;
         });

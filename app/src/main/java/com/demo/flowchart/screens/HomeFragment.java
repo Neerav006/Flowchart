@@ -70,7 +70,6 @@ public class HomeFragment extends Fragment {
             @Override
             public void onFlowchartClick(long flowchartId) {
                 navigator.navigateTo(EditorFragment.newInstance(flowchartId));
-
             }
 
             @Override
